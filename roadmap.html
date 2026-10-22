@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Target Input &amp; Injection System Roadmap</title>
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --border-color: #30363d;
+      --text-main: #c9d1d9;
+      --text-muted: #8b949e;
+      --text-bright: #f0f6fc;
+      --accent: #58a6ff;
+      --accent-emphasis: #1f6feb;
+      --warning-border: #d29922;
+      --warning-bg: rgba(187, 128, 9, 0.15);
+      --code-bg: #111418;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3 {
+      color: var(--text-bright);
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.4rem;
+      margin-top: 2.5rem;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      margin-top: 1.5rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    pre, code {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.875rem;
+    }
+
+    code {
+      background-color: var(--bg-tertiary);
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      color: var(--text-bright);
+    }
+
+    pre code {
+      background-color: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: inherit;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+      display: block;
+      overflow-x: auto;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 0.6rem 1rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--bg-secondary);
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--bg-secondary);
+    }
+
+    ul {
+      margin-bottom: 1.25rem;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.35rem;
+    }
+
+    .alert {
+      background-color: var(--warning-bg);
+      border-left: 4px solid var(--warning-border);
+      padding: 0.75rem 1rem;
+      border-radius: 0 4px 4px 0;
+      margin-bottom: 1.25rem;
+    }
+
+    .checklist {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .checklist li::before {
+      content: "\25A2";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Multi-Target Input &amp; Injection System</h1>
+    <p>Comprehensive architecture and phased engineering roadmap for a multi-profile remote control, keystroke injection, and device management ecosystem targeting the Pixel 8a, ESP32 hardware dongles, network targets, and infrared emitters.</p>
+
+    <h2>1. System Architecture Overview</h2>
+    <pre><code>                               ┌────────────────────────────────────────┐
+                               │       Pixel 8a Control Hub App         │
+                               │  - Jetpack Compose Dynamic Surfaces    │
+                               │  - Room Persistence (Profiles/Mappings)│
+                               │  - Single-Link State Machine Router    │
+                               │  - Setup &amp; Onboarding Guide Registry   │
+                               └────────────────────┬───────────────────┘
+                                                    │
+         ┌─────────────────────────┬────────────────┼─────────────────────────┬─────────────────────────┐
+         │ (Direct BT HID)         │ (BLE Bridge)   │ (HTTP REST)             │ (TCP / SSH)             │ (IR Transports)
+         ▼                         ▼                ▼                         ▼                         ▼
+┌──────────────────┐     ┌───────────────────┐ ┌─────────────┐       ┌─────────────────┐       ┌─────────────────┐
+│   Target Host    │     │ ESP32-S2/S3 Dongle│ │ Roku TV ECP │       │ Linux Host/NAS  │       │ Target Appliance│
+│ (PC / Mac / TV)  │     │ - TinyUSB HID     │ │ (Port 8060) │       │ (Port 22 Shell/ │       │ (TV / AV / AC)  │
+│ Serverless Input │     │ - IR Transmitter  │ └─────────────┘       │  Exec Commands) │       └────────┬────────┘
+└──────────────────┘     └─────────┬─────────┘                       └─────────────────┘                │
+                                   │                                                                    │
+                                   ├─ USB OTG (Host Keystrokes)                                         │
+                                   └─ Hardware IR (38kHz Carrier) ──────────────────────────────────────┘
+                                                                                                        │
+                                 ┌──────────────────────────────────────────────────────────────────────┤
+                                 │ Alternate IR Transports:                                             │
+                                 ├─ Internal Blaster (ConsumerIrManager)                                │
+                                 ├─ USB-C CDC Blaster Dongle                                            │
+                                 ├─ 3.5mm Headphone Jack (AudioTrack 19kHz Out-of-Phase Carrier)        │
+                                 └─ Flipper Zero Bridge (BLE Serial CLI `ir tx`)                        │
+                                                                                                        │
+                                 ┌──────────────────────────────────────────────────────────────────────┘
+                                 │ Low-Priority Composite Expansion:
+                                 ▼
+                         ┌───────────────────┐
+                         │ Raspberry Pi Zero │
+                         │ (dwc2 ConfigFS)   │
+                         │ - /dev/hidg0      │
+                         │ - Mass Storage    │
+                         │ - RNDIS / Network │
+                         └───────────────────┘</code></pre>
+
+    <h2>2. Technical Stack &amp; Hardware Requirements</h2>
+    <h3>Mobile Application</h3>
+    <ul>
+      <li><strong>Platform:</strong> Android 14+ (Target SDK 34/35), optimized for Pixel 8a.</li>
+      <li><strong>UI Toolkit:</strong> Jetpack Compose with dynamic Material 3 design and dark theme.</li>
+      <li><strong>Database:</strong> SQLite via Android Room with reactive Kotlin Coroutines/Flow.</li>
+      <li><strong>Protocols &amp; APIs:</strong>
+        <ul>
+          <li><strong>Bluetooth Classic / BLE:</strong> Android <code>BluetoothHidDevice</code>, <code>BluetoothLeAdvertiser</code>, <code>BluetoothGatt</code>.</li>
+          <li><strong>HTTP / LAN:</strong> <code>OkHttp3</code> for Roku External Control Protocol (ECP) REST requests.</li>
+          <li><strong>SSH:</strong> <code>net.schmizz:sshj:0.38.0</code> for encrypted command execution and interactive sessions.</li>
+          <li><strong>Native Infrared:</strong> Android <code>ConsumerIrManager</code>.</li>
+          <li><strong>Audio Modulation:</strong> Android <code>AudioTrack</code> (PCM 16-bit 48kHz stereo) for passive 3.5mm emitters.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>Microcontroller Dongle</h3>
+    <ul>
+      <li><strong>SoC:</strong> ESP32-S2 or ESP32-S3 (Classic ESP32-WROOM/WROVER lack native USB OTG and cannot be used).</li>
+      <li><strong>Firmware Framework:</strong> ESP-IDF or PlatformIO / Arduino Core with <code>Adafruit_TinyUSB</code> and <code>IRremoteESP8266</code>.</li>
+      <li><strong>Hardware Interfacing:</strong>
+        <ul>
+          <li>USB Host communication via native GPIO 19 (<code>D-</code>) and GPIO 20 (<code>D+</code>).</li>
+          <li>Infrared transmission via onboard Remote Control Peripheral (RMT) driving a 940nm IR LED through a 2N2222/2N3904 NPN transistor and 10–22Ω current-limiting resistor.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h2>3. Database Schema Design (Room Persistence)</h2>
+    <pre><code>enum class ConnectionType {
+    DIRECT_BT_HID,
+    ESP32_BLE_BRIDGE,
+    ESP32_IR_EMITTER,
+    ESP32_HYBRID,
+    ROKU_ECP_WIFI,
+    INTERNAL_IR,
+    USB_IR_DONGLE,
+    AUDIO_JACK_IR,
+    FLIPPER_ZERO_BRIDGE,
+    SSH_NETWORK
+}
+
+enum class ProfileType {
+    PC_KEYBOARD,
+    TV_REMOTE,
+    MEDIA_CONTROLLER,
+    PRESENTATION_CLICKER,
+    TERMINAL_MACRO,
+    SSH_SESSION
+}
+
+@Entity(
+    tableName = "target_devices",
+    indices = [Index(value = ["mac_address"], unique = true)]
+)
+data class TargetDeviceEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "connection_type") val connectionType: ConnectionType,
+    @ColumnInfo(name = "profile_type") val profileType: ProfileType,
+    @ColumnInfo(name = "mac_address") val macAddress: String? = null,
+    @ColumnInfo(name = "host_address") val hostAddress: String? = null, // IP or Hostname
+    @ColumnInfo(name = "port") val port: Int = 22,
+    @ColumnInfo(name = "auth_username") val authUsername: String? = null,
+    @ColumnInfo(name = "auth_type") val authType: String? = "KEY", // "KEY" or "PASSWORD"
+    @ColumnInfo(name = "carrier_frequency") val carrierFrequency: Int = 38000,
+    @ColumnInfo(name = "inter_key_delay_ms") val interKeyDelayMs: Int = 10,
+    @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "button_mappings",
+    foreignKeys = [
+        ForeignKey(
+            entity = TargetDeviceEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["device_id"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index(value = ["device_id", "button_identifier"], unique = true)]
+)
+data class ButtonMappingEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(name = "device_id") val deviceId: Long,
+    @ColumnInfo(name = "button_identifier") val buttonIdentifier: String, // e.g., "KEY_ENTER", "VOL_UP", "REBOOT"
+    @ColumnInfo(name = "label") val label: String,
+    // HID & Media Mappings
+    @ColumnInfo(name = "hid_page") val hidPage: Int = 0x07, // 0x07 = Keyboard, 0x0C = Consumer
+    @ColumnInfo(name = "usage_id") val usageId: Int = 0,
+    @ColumnInfo(name = "modifier_flags") val modifierFlags: Byte = 0,
+    // Infrared Data
+    @ColumnInfo(name = "ir_protocol") val irProtocol: String? = null, // "NEC", "RC5", "RAW"
+    @ColumnInfo(name = "ir_hex_code") val irHexCode: String? = null,
+    @ColumnInfo(name = "ir_raw_timings") val irRawTimings: String? = null,
+    // Network / SSH / ECP Command Payload
+    @ColumnInfo(name = "command_payload") val commandPayload: String? = null
+)</code></pre>
+
+    <h2>4. Contextual Onboarding &amp; Setup Instructions Engine</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Target Type</th>
+          <th>In-App Setup Step</th>
+          <th>Critical Warnings &amp; Specific Verification Checks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Direct BT HID</strong></td>
+          <td>1. Prompt system discoverability via <code>ACTION_REQUEST_DISCOVERABLE</code>.<br>2. Direct user to target device Bluetooth settings.</td>
+          <td>Target OS must complete pairing handshake. No host software required.</td>
+        </tr>
+        <tr>
+          <td><strong>ESP32 Dongle</strong></td>
+          <td>1. Insert dongle into native USB port.<br>2. Pair phone to dongle BLE advertising name.</td>
+          <td>Ensure board uses ESP32-S2/S3 native pins (GPIO 19/20), not UART bridge.</td>
+        </tr>
+        <tr>
+          <td><strong>Roku TV (ECP)</strong></td>
+          <td>1. Verify phone and TV share same Wi-Fi subnet.<br>2. Enable network control in Roku settings.</td>
+          <td><strong>Roku OS 14.1+ Requirement:</strong> Navigate to <code>Settings → System → Advanced system settings → Control by mobile apps → Network access</code> and set to <strong>"Enabled"</strong>.</td>
+        </tr>
+        <tr>
+          <td><strong>SSH Host</strong></td>
+          <td>1. Prompt user for target IP and port.<br>2. In-app Ed25519 key generation.</td>
+          <td>Provide 1-tap "Copy Public Key" button for appending to target <code>~/.ssh/authorized_keys</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>3.5mm IR Jack</strong></td>
+          <td>1. Plug passive audio IR blaster into 3.5mm adapter.<br>2. Set media volume to 100%.</td>
+          <td><strong>Volume Warning:</strong> Disable system equalizers, Dolby Atmos, and hearing-safety limiters to prevent wave clipping.</td>
+        </tr>
+        <tr>
+          <td><strong>Flipper Zero</strong></td>
+          <td>1. Enable Bluetooth on Flipper (<code>Settings → Bluetooth</code>).<br>2. Pair via app BLE scanner.</td>
+          <td>Ensure Flipper is on home screen (CLI session blocked if stuck in sub-menus).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>5. Phased Engineering Roadmap</h2>
+    <pre><code>├── Phase 1: Android Core Bluetooth Engine &amp; Text Pipeline (High Priority)
+│   ├── Task 1.1: Initialize Android Studio project (Kotlin, Coroutines, Jetpack Compose, Dark Theme).
+│   ├── Task 1.2: Implement BluetoothHidDevice profile registration with SDP boot keyboard records.
+│   ├── Task 1.3: Build UTF-8 character to standard USB HID Usage Tables (Page 0x07) translation engine.
+│   ├── Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay.
+│   └── Task 1.5: Implement BLE GATT Client connection manager using Nordic UART Service (NUS) protocol.
+│
+├── Phase 2: ESP32-S2/S3 Dongle Firmware (High Priority)
+│   ├── Task 2.1: Bootstrap PlatformIO project with native TinyUSB stack for ESP32-S2/S3.
+│   ├── Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs.
+│   ├── Task 2.3: Implement NimBLE GATT NUS service receiving binary command frames.
+│   ├── Task 2.4: Implement thread-safe FIFO ring buffer bridging BLE payloads to USB HID endpoints.
+│   └── Task 2.5: Add hardware pairing bond security and static PIN authentication.
+│
+├── Phase 3: Database, Multi-Profile Engine &amp; UI Routing (High Priority)
+│   ├── Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs.
+│   ├── Task 3.2: Implement single-link DeviceConnectionRouter using Disconnect-Before-Connect lifecycle.
+│   ├── Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions.
+│   ├── Task 3.4: Build dynamic Compose UI surfaces (Full Keyboard, D-Pad TV Remote, Media Bar, Macro Pad).
+│   └── Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles.
+│
+├── Phase 4: Network Transport Extensions (Low Priority)
+│   ├── Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints).
+│   ├── Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback.
+│   ├── Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation.
+│   ├── Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming.
+│   └── Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
+│
+└── Phase 5: Infrared Subsystem Extensions (Low Priority)
+    ├── Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library.
+    ├── Task 5.2: Update BLE frame specification to handle IR protocol opcodes (NEC, Sony, RC5, Raw).
+    ├── Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters.
+    ├── Task 5.4: Build AudioTrack 19kHz dual-channel phase-inverted carrier generator for 3.5mm adapters.
+    ├── Task 5.5: Implement USB Host CDC-ACM serial driver for USB-C IR dongles.
+    └── Task 5.6: Implement Flipper Zero BLE serial bridge sending direct `ir tx` CLI commands.</code></pre>
+
+    <h2>6. Verification &amp; Validation Checklists</h2>
+    <h3>Milestone 1: Direct Bluetooth HID (Pixel 8a)</h3>
+    <ul class="checklist">
+      <li>Phone registers <code>BluetoothHidDevice</code> without crashing.</li>
+      <li>Target host (PC/Mac/Linux) discovers phone as standard Bluetooth Keyboard.</li>
+      <li>Precompose text injection sends 500 characters of mixed ASCII without dropped letters or stuck modifiers.</li>
+    </ul>
+
+    <h3>Milestone 2: ESP32 Dongle Bridge</h3>
+    <ul class="checklist">
+      <li>ESP32-S2/S3 enumerates in target host BIOS/UEFI as standard USB HID Keyboard.</li>
+      <li>Android app connects to ESP32 over BLE within 1.5 seconds of profile selection.</li>
+      <li>Keystrokes sent over BLE pass through FIFO buffer to host with under 20ms perceived latency.</li>
+    </ul>
+
+    <h3>Milestone 3: Profile State Machine</h3>
+    <ul class="checklist">
+      <li>Switching from Profile A (Direct BT) to Profile B (ESP32) cleanly severs Link A before initializing Link B.</li>
+      <li>No residual Bluetooth locks or background connection conflicts occur when switching profiles rapidly.</li>
+    </ul>
+
+    <h3>Milestone 4: Roku Network Remote</h3>
+    <ul class="checklist">
+      <li>App prompts user with Roku OS 14.1+ "Control by mobile apps" setup modal during device registration.</li>
+      <li>App fires <code>POST http://&lt;ROKU_IP&gt;:8060/keypress/Home</code> and navigates TV interface instantly.</li>
+      <li>App successfully types text using sequential <code>Lit_&lt;char&gt;</code> requests with proper URL encoding.</li>
+    </ul>
+
+    <h3>Milestone 5: SSH &amp; IR Modules</h3>
+    <ul class="checklist">
+      <li>App generates Ed25519 keypair and successfully authenticates against target SSH server.</li>
+      <li>ESP32 RMT peripheral outputs calibrated 38kHz square wave driving IR LED to control target TV.</li>
+      <li>AudioTrack module produces 19kHz stereo audio file without DAC distortion when volume is set to 100%.</li>
+    </ul>
+  </div>
+</body>
+</html>
+
