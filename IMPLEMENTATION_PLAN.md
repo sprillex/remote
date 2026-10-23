@@ -5,7 +5,7 @@
 - **Core Technical Requirements:** Bootstrap a modern Android project targeting SDK 34/35. Setup Jetpack Compose and Coroutines dependencies.
 - **Verification Criteria:** `./gradlew build`
 
-### Task 1.2: Implement BluetoothHidDevice profile registration with SDP boot keyboard records. [HARD]
+### Task 1.2: Implement BluetoothHidDevice profile registration with SDP boot keyboard records. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/bluetooth/HidDeviceManager.kt` (Create)
 - **Core Technical Requirements:** Android platform implementation using `BluetoothHidDevice`. Must handle SDP records for standard keyboard.
 - **Verification Criteria:** `./gradlew test`

@@ -154,7 +154,7 @@ data class ButtonMappingEntity(
 ```
 ├── Phase 1: Android Core Bluetooth Engine & Text Pipeline (High Priority) [Audit Complete - Unstarted]
 │   ├── [x] Task 1.1: Initialize Android Studio project (Kotlin, Coroutines, Jetpack Compose, Dark Theme).
-│   ├── [ ] Task 1.2: Implement BluetoothHidDevice profile registration with SDP boot keyboard records.
+│   ├── [x] Task 1.2: Implement BluetoothHidDevice profile registration with SDP boot keyboard records.
 │   ├── [ ] Task 1.3: Build UTF-8 character to standard USB HID Usage Tables (Page 0x07) translation engine.
 │   ├── [ ] Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay.
 │   └── [ ] Task 1.5: Implement BLE GATT Client connection manager using Nordic UART Service (NUS) protocol.
