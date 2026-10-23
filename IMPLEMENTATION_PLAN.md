@@ -110,7 +110,7 @@
 - **Core Technical Requirements:** Protocol expansion for IR packets.
 - **Verification Criteria:** `cd firmware && pio check`
 
-### Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters. [EASY]
+### Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/ir/ConsumerIr.kt` (Create)
 - **Core Technical Requirements:** Android system IR API wrapper.
 - **Verification Criteria:** `./gradlew lint`
