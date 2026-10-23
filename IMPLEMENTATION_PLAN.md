@@ -15,7 +15,7 @@
 - **Core Technical Requirements:** NimBLE security manager configuration for encrypted connections.
 - **Verification Criteria:** `cd firmware && pio check`
 
-### Task 3.2: Implement single-link DeviceConnectionRouter using Disconnect-Before-Connect lifecycle. [HARD]
+### Task 3.2: Implement single-link DeviceConnectionRouter using Disconnect-Before-Connect lifecycle. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/router/ConnectionRouter.kt` (Create)
 - **Core Technical Requirements:** Coroutine-based state machine for exclusive link management.
 - **Verification Criteria:** `./gradlew test`
