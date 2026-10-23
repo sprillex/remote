@@ -5,7 +5,7 @@
 - **Core Technical Requirements:** TinyUSB HID setup on native ESP32-S2/S3 USB pins.
 - **Verification Criteria:** `cd firmware && pio check`
 
-### Task 2.4: Implement thread-safe FIFO ring buffer bridging BLE payloads to USB HID endpoints. [HARD]
+### Task 2.4: Implement thread-safe FIFO ring buffer bridging BLE payloads to USB HID endpoints. [RESOLVED]
 - **Target Files:** `firmware/src/ring_buffer.cpp`, `firmware/src/ring_buffer.h` (Create)
 - **Core Technical Requirements:** FreeRTOS queue or ring buffer bridging NimBLE and TinyUSB.
 - **Verification Criteria:** `cd firmware && pio check`
