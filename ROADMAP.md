@@ -164,7 +164,7 @@ data class ButtonMappingEntity(
 │   ├── [ ] Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs.
 │   ├── [x] Task 2.3: Implement NimBLE GATT NUS service receiving binary command frames.
 │   ├── [ ] Task 2.4: Implement thread-safe FIFO ring buffer bridging BLE payloads to USB HID endpoints.
-│   └── [ ] Task 2.5: Add hardware pairing bond security and static PIN authentication.
+│   └── [x] Task 2.5: Add hardware pairing bond security and static PIN authentication.
 │
 ├── Phase 3: Database, Multi-Profile Engine & UI Routing (High Priority) [Audit Complete - Unstarted]
 │   ├── [x] Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs.

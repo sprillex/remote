@@ -10,7 +10,7 @@
 - **Core Technical Requirements:** FreeRTOS queue or ring buffer bridging NimBLE and TinyUSB.
 - **Verification Criteria:** `cd firmware && pio check`
 
-### Task 2.5: Add hardware pairing bond security and static PIN authentication. [EASY]
+### Task 2.5: Add hardware pairing bond security and static PIN authentication. [RESOLVED]
 - **Target Files:** `firmware/src/ble_sec.cpp` (Create)
 - **Core Technical Requirements:** NimBLE security manager configuration for encrypted connections.
 - **Verification Criteria:** `cd firmware && pio check`
