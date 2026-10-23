@@ -159,16 +159,16 @@ data class ButtonMappingEntity(
 │   ├── [x] Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay.
 │   └── [x] Task 1.5: Implement BLE GATT Client connection manager using Nordic UART Service (NUS) protocol.
 │
-├── Phase 2: ESP32-S2/S3 Dongle Firmware (High Priority) [Audit Complete - Unstarted]
-│   ├── [ ] Task 2.1: Bootstrap PlatformIO project with native TinyUSB stack for ESP32-S2/S3.
-│   ├── [ ] Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs.
+├── Phase 2: ESP32-S2/S3 Dongle Firmware (High Priority) [Audit Complete - In Progress]
+│   ├── [x] Task 2.1: Bootstrap PlatformIO project with native TinyUSB stack for ESP32-S2/S3.
+│   ├── [x] Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs.
 │   ├── [x] Task 2.3: Implement NimBLE GATT NUS service receiving binary command frames.
-│   ├── [ ] Task 2.4: Implement thread-safe FIFO ring buffer bridging BLE payloads to USB HID endpoints.
-│   └── [ ] Task 2.5: Add hardware pairing bond security and static PIN authentication.
+│   ├── [x] Task 2.4: Implement thread-safe FIFO ring buffer bridging BLE payloads to USB HID endpoints.
+│   └── [x] Task 2.5: Add hardware pairing bond security and static PIN authentication.
 │
-├── Phase 3: Database, Multi-Profile Engine & UI Routing (High Priority) [Audit Complete - Unstarted]
+├── Phase 3: Database, Multi-Profile Engine & UI Routing (High Priority) [Audit Complete - In Progress]
 │   ├── [x] Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs.
-│   ├── [ ] Task 3.2: Implement single-link DeviceConnectionRouter using Disconnect-Before-Connect lifecycle.
+│   ├── [x] Task 3.2: Implement single-link DeviceConnectionRouter using Disconnect-Before-Connect lifecycle.
 │   ├── [x] Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions.
 │   ├── [ ] Task 3.4: Build dynamic Compose UI surfaces (Full Keyboard, D-Pad TV Remote, Media Bar, Macro Pad).
 │   └── [x] Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles.
@@ -186,7 +186,7 @@ data class ButtonMappingEntity(
     ├── [x] Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters.
     ├── [ ] Task 5.4: Build AudioTrack 19kHz dual-channel phase-inverted carrier generator for 3.5mm adapters.
     ├── [ ] Task 5.5: Implement USB Host CDC-ACM serial driver for USB-C IR dongles.
-    └── [ ] Task 5.6: Implement Flipper Zero BLE serial bridge sending direct `ir tx` CLI commands.
+    └── [x] Task 5.6: Implement Flipper Zero BLE serial bridge sending direct `ir tx` CLI commands.
 ```
 
 ## 6. Verification & Validation Checklists
@@ -204,8 +204,8 @@ data class ButtonMappingEntity(
 - [ ] Keystrokes sent over BLE pass through FIFO buffer to host with under 20ms perceived latency.
 
 ### Milestone 3: Profile State Machine
-**Status:** [Audit Complete - Unstarted]
-- [ ] Switching from Profile A (Direct BT) to Profile B (ESP32) cleanly severs Link A before initializing Link B.
+**Status:** [Audit Complete - In Progress]
+- [x] Switching from Profile A (Direct BT) to Profile B (ESP32) cleanly severs Link A before initializing Link B.
 - [ ] No residual Bluetooth locks or background connection conflicts occur when switching profiles rapidly.
 
 ### Milestone 4: Roku Network Remote
