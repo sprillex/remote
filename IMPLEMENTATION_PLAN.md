@@ -20,7 +20,7 @@
 - **Core Technical Requirements:** Jetpack Compose UI with text buffer state and injection coroutine honoring interKeyDelayMs.
 - **Verification Criteria:** `./gradlew lint`
 
-### Task 1.5: Implement BLE GATT Client connection manager using Nordic UART Service (NUS) protocol. [HARD]
+### Task 1.5: Implement BLE GATT Client connection manager using Nordic UART Service (NUS) protocol. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/bluetooth/BleGattManager.kt` (Create)
 - **Core Technical Requirements:** Manage BLE connections to ESP32 dongle using NUS characteristics for RX/TX.
 - **Verification Criteria:** `./gradlew test`
