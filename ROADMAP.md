@@ -162,7 +162,7 @@ data class ButtonMappingEntity(
 ├── Phase 2: ESP32-S2/S3 Dongle Firmware (High Priority) [Audit Complete - Unstarted]
 │   ├── [ ] Task 2.1: Bootstrap PlatformIO project with native TinyUSB stack for ESP32-S2/S3.
 │   ├── [ ] Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs.
-│   ├── [ ] Task 2.3: Implement NimBLE GATT NUS service receiving binary command frames.
+│   ├── [x] Task 2.3: Implement NimBLE GATT NUS service receiving binary command frames.
 │   ├── [ ] Task 2.4: Implement thread-safe FIFO ring buffer bridging BLE payloads to USB HID endpoints.
 │   └── [ ] Task 2.5: Add hardware pairing bond security and static PIN authentication.
 │
