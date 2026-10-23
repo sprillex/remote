@@ -50,7 +50,7 @@
 - **Core Technical Requirements:** NimBLE security manager configuration.
 - **Verification Criteria:** `cd firmware && pio check`
 
-### Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs. [EASY]
+### Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/db/AppDatabase.kt`, `app/src/main/java/com/remote/db/Entities.kt` (Create)
 - **Core Technical Requirements:** Room persistence schema based on design.
 - **Verification Criteria:** `./gradlew build`
@@ -70,7 +70,7 @@
 - **Core Technical Requirements:** Adaptive UI grids and buttons.
 - **Verification Criteria:** `./gradlew lint`
 
-### Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles. [EASY]
+### Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/ui/DeviceManager.kt` (Create)
 - **Core Technical Requirements:** CRUD UI bound to Room.
 - **Verification Criteria:** `./gradlew lint`

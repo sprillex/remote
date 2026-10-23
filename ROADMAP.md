@@ -167,11 +167,11 @@ data class ButtonMappingEntity(
 │   └── [ ] Task 2.5: Add hardware pairing bond security and static PIN authentication.
 │
 ├── Phase 3: Database, Multi-Profile Engine & UI Routing (High Priority) [Audit Complete - Unstarted]
-│   ├── [ ] Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs.
+│   ├── [x] Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs.
 │   ├── [ ] Task 3.2: Implement single-link DeviceConnectionRouter using Disconnect-Before-Connect lifecycle.
 │   ├── [ ] Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions.
 │   ├── [ ] Task 3.4: Build dynamic Compose UI surfaces (Full Keyboard, D-Pad TV Remote, Media Bar, Macro Pad).
-│   └── [ ] Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles.
+│   └── [x] Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles.
 │
 ├── Phase 4: Network Transport Extensions (Low Priority) [Audit Complete - Unstarted]
 │   ├── [ ] Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints).
