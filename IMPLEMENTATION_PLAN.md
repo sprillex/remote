@@ -30,7 +30,7 @@
 - **Core Technical Requirements:** Embedded C/C++ project setup.
 - **Verification Criteria:** `cd firmware && pio run`
 
-### Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs. [HARD]
+### Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs. [RESOLVED]
 - **Target Files:** `firmware/src/usb_hid.cpp`, `firmware/src/usb_hid.h` (Create)
 - **Core Technical Requirements:** TinyUSB HID setup on native ESP32-S2/S3 USB pins.
 - **Verification Criteria:** `cd firmware && pio check`
