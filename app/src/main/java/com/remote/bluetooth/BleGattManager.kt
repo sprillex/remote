@@ -96,7 +96,7 @@ class BleGattManager(private val context: Context) {
         val rx = rxCharacteristic ?: return false
         
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            return gatt.writeCharacteristic(rx, data, rx.writeType) == BluetoothGatt.GATT_SUCCESS
+            return gatt.writeCharacteristic(rx, data, rx.writeType) == android.bluetooth.BluetoothStatusCodes.SUCCESS
         } else {
             rx.value = data
             return gatt.writeCharacteristic(rx)

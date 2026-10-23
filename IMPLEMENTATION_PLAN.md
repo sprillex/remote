@@ -15,7 +15,7 @@
 - **Core Technical Requirements:** Map characters to HID page 0x07 bytes.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay. [EASY]
+### Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/ui/PrecomposeBuffer.kt` (Create)
 - **Core Technical Requirements:** Jetpack Compose UI with text buffer state and injection coroutine honoring interKeyDelayMs.
 - **Verification Criteria:** `./gradlew lint`
