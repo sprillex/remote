@@ -35,7 +35,7 @@
 - **Core Technical Requirements:** TinyUSB HID setup on native ESP32-S2/S3 USB pins.
 - **Verification Criteria:** `cd firmware && pio check`
 
-### Task 2.3: Implement NimBLE GATT NUS service receiving binary command frames. [HARD]
+### Task 2.3: Implement NimBLE GATT NUS service receiving binary command frames. [RESOLVED]
 - **Target Files:** `firmware/src/ble_nus.cpp`, `firmware/src/ble_nus.h` (Create)
 - **Core Technical Requirements:** Expose Nordic UART Service via NimBLE and parse incoming packets.
 - **Verification Criteria:** `cd firmware && pio check`
