@@ -1,6 +1,6 @@
 # Implementation Plan
 
-### Task 1.1: Initialize Android Studio project (Kotlin, Coroutines, Jetpack Compose, Dark Theme). [EASY]
+### Task 1.1: Initialize Android Studio project (Kotlin, Coroutines, Jetpack Compose, Dark Theme). [RESOLVED]
 - **Target Files:** `app/build.gradle.kts`, `settings.gradle.kts`, `app/src/main/AndroidManifest.xml` (Create)
 - **Core Technical Requirements:** Bootstrap a modern Android project targeting SDK 34/35. Setup Jetpack Compose and Coroutines dependencies.
 - **Verification Criteria:** `./gradlew build`
