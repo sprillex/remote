@@ -60,7 +60,7 @@
 - **Core Technical Requirements:** Coroutine-based state machine for exclusive link management.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions. [EASY]
+### Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/ui/SetupGuides.kt` (Create)
 - **Core Technical Requirements:** UI registry matching Device Type.
 - **Verification Criteria:** `./gradlew lint`

@@ -169,7 +169,7 @@ data class ButtonMappingEntity(
 ├── Phase 3: Database, Multi-Profile Engine & UI Routing (High Priority) [Audit Complete - Unstarted]
 │   ├── [x] Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs.
 │   ├── [ ] Task 3.2: Implement single-link DeviceConnectionRouter using Disconnect-Before-Connect lifecycle.
-│   ├── [ ] Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions.
+│   ├── [x] Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions.
 │   ├── [ ] Task 3.4: Build dynamic Compose UI surfaces (Full Keyboard, D-Pad TV Remote, Media Bar, Macro Pad).
 │   └── [x] Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles.
 │
