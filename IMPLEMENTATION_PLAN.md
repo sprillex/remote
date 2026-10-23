@@ -75,7 +75,7 @@
 - **Core Technical Requirements:** CRUD UI bound to Room.
 - **Verification Criteria:** `./gradlew lint`
 
-### Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints). [EASY]
+### Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints). [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/network/RokuClient.kt` (Create)
 - **Core Technical Requirements:** REST client handling ECP spec.
 - **Verification Criteria:** `./gradlew test`
