@@ -10,7 +10,7 @@
 - **Core Technical Requirements:** Android platform implementation using `BluetoothHidDevice`. Must handle SDP records for standard keyboard.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 1.3: Build UTF-8 character to standard USB HID Usage Tables (Page 0x07) translation engine. [EASY]
+### Task 1.3: Build UTF-8 character to standard USB HID Usage Tables (Page 0x07) translation engine. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/bluetooth/KeyTranslator.kt` (Create)
 - **Core Technical Requirements:** Map characters to HID page 0x07 bytes.
 - **Verification Criteria:** `./gradlew test`
