@@ -160,7 +160,7 @@ data class ButtonMappingEntity(
 │   └── [x] Task 1.5: Implement BLE GATT Client connection manager using Nordic UART Service (NUS) protocol.
 │
 ├── Phase 2: ESP32-S2/S3 Dongle Firmware (High Priority) [Audit Complete - Unstarted]
-│   ├── [ ] Task 2.1: Bootstrap PlatformIO project with native TinyUSB stack for ESP32-S2/S3.
+│   ├── [x] Task 2.1: Bootstrap PlatformIO project with native TinyUSB stack for ESP32-S2/S3.
 │   ├── [ ] Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs.
 │   ├── [x] Task 2.3: Implement NimBLE GATT NUS service receiving binary command frames.
 │   ├── [ ] Task 2.4: Implement thread-safe FIFO ring buffer bridging BLE payloads to USB HID endpoints.
@@ -186,7 +186,7 @@ data class ButtonMappingEntity(
     ├── [x] Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters.
     ├── [ ] Task 5.4: Build AudioTrack 19kHz dual-channel phase-inverted carrier generator for 3.5mm adapters.
     ├── [ ] Task 5.5: Implement USB Host CDC-ACM serial driver for USB-C IR dongles.
-    └── [ ] Task 5.6: Implement Flipper Zero BLE serial bridge sending direct `ir tx` CLI commands.
+    └── [x] Task 5.6: Implement Flipper Zero BLE serial bridge sending direct `ir tx` CLI commands.
 ```
 
 ## 6. Verification & Validation Checklists
