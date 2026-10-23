@@ -15,7 +15,7 @@
 - **Core Technical Requirements:** Map characters to HID page 0x07 bytes.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay. [EASY]
+### Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/ui/PrecomposeBuffer.kt` (Create)
 - **Core Technical Requirements:** Jetpack Compose UI with text buffer state and injection coroutine honoring interKeyDelayMs.
 - **Verification Criteria:** `./gradlew lint`
@@ -50,7 +50,7 @@
 - **Core Technical Requirements:** NimBLE security manager configuration.
 - **Verification Criteria:** `cd firmware && pio check`
 
-### Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs. [EASY]
+### Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/db/AppDatabase.kt`, `app/src/main/java/com/remote/db/Entities.kt` (Create)
 - **Core Technical Requirements:** Room persistence schema based on design.
 - **Verification Criteria:** `./gradlew build`
@@ -60,7 +60,7 @@
 - **Core Technical Requirements:** Coroutine-based state machine for exclusive link management.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions. [EASY]
+### Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/ui/SetupGuides.kt` (Create)
 - **Core Technical Requirements:** UI registry matching Device Type.
 - **Verification Criteria:** `./gradlew lint`
@@ -70,12 +70,12 @@
 - **Core Technical Requirements:** Adaptive UI grids and buttons.
 - **Verification Criteria:** `./gradlew lint`
 
-### Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles. [EASY]
+### Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/ui/DeviceManager.kt` (Create)
 - **Core Technical Requirements:** CRUD UI bound to Room.
 - **Verification Criteria:** `./gradlew lint`
 
-### Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints). [EASY]
+### Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints). [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/network/RokuClient.kt` (Create)
 - **Core Technical Requirements:** REST client handling ECP spec.
 - **Verification Criteria:** `./gradlew test`
@@ -110,7 +110,7 @@
 - **Core Technical Requirements:** Protocol expansion for IR packets.
 - **Verification Criteria:** `cd firmware && pio check`
 
-### Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters. [EASY]
+### Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/ir/ConsumerIr.kt` (Create)
 - **Core Technical Requirements:** Android system IR API wrapper.
 - **Verification Criteria:** `./gradlew lint`

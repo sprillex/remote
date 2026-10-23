@@ -156,7 +156,7 @@ data class ButtonMappingEntity(
 │   ├── [x] Task 1.1: Initialize Android Studio project (Kotlin, Coroutines, Jetpack Compose, Dark Theme).
 │   ├── [x] Task 1.2: Implement BluetoothHidDevice profile registration with SDP boot keyboard records.
 │   ├── [x] Task 1.3: Build UTF-8 character to standard USB HID Usage Tables (Page 0x07) translation engine.
-│   ├── [ ] Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay.
+│   ├── [x] Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay.
 │   └── [x] Task 1.5: Implement BLE GATT Client connection manager using Nordic UART Service (NUS) protocol.
 │
 ├── Phase 2: ESP32-S2/S3 Dongle Firmware (High Priority) [Audit Complete - Unstarted]
@@ -167,14 +167,14 @@ data class ButtonMappingEntity(
 │   └── [ ] Task 2.5: Add hardware pairing bond security and static PIN authentication.
 │
 ├── Phase 3: Database, Multi-Profile Engine & UI Routing (High Priority) [Audit Complete - Unstarted]
-│   ├── [ ] Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs.
+│   ├── [x] Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs.
 │   ├── [ ] Task 3.2: Implement single-link DeviceConnectionRouter using Disconnect-Before-Connect lifecycle.
-│   ├── [ ] Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions.
+│   ├── [x] Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions.
 │   ├── [ ] Task 3.4: Build dynamic Compose UI surfaces (Full Keyboard, D-Pad TV Remote, Media Bar, Macro Pad).
-│   └── [ ] Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles.
+│   └── [x] Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles.
 │
 ├── Phase 4: Network Transport Extensions (Low Priority) [Audit Complete - Unstarted]
-│   ├── [ ] Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints).
+│   ├── [x] Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints).
 │   ├── [ ] Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback.
 │   ├── [ ] Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation.
 │   ├── [ ] Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming.
@@ -183,7 +183,7 @@ data class ButtonMappingEntity(
 └── Phase 5: Infrared Subsystem Extensions (Low Priority) [Audit Complete - Unstarted]
     ├── [ ] Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library.
     ├── [ ] Task 5.2: Update BLE frame specification to handle IR protocol opcodes (NEC, Sony, RC5, Raw).
-    ├── [ ] Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters.
+    ├── [x] Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters.
     ├── [ ] Task 5.4: Build AudioTrack 19kHz dual-channel phase-inverted carrier generator for 3.5mm adapters.
     ├── [ ] Task 5.5: Implement USB Host CDC-ACM serial driver for USB-C IR dongles.
     └── [ ] Task 5.6: Implement Flipper Zero BLE serial bridge sending direct `ir tx` CLI commands.

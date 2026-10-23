@@ -6,7 +6,9 @@ import android.bluetooth.BluetoothHidDevice
 import android.bluetooth.BluetoothHidDeviceAppSdpSettings
 import android.bluetooth.BluetoothHidDeviceAppQosSettings
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 
 class HidDeviceManager(private val context: Context) {
 
@@ -65,27 +67,36 @@ class HidDeviceManager(private val context: Context) {
 
     private var hidDevice: BluetoothHidDevice? = null
 
-    val sdpSettings = BluetoothHidDeviceAppSdpSettings(
-        "RemoteKeyboard",
-        "Android Bluetooth HID",
-        "Google",
-        SUBCLASS_KEYBOARD,
-        KEYBOARD_DESCRIPTOR
-    )
+    val sdpSettings by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            BluetoothHidDeviceAppSdpSettings(
+                "RemoteKeyboard",
+                "Android Bluetooth HID",
+                "Google",
+                SUBCLASS_KEYBOARD,
+                KEYBOARD_DESCRIPTOR
+            )
+        } else null
+    }
 
-    private val callback = object : BluetoothHidDevice.Callback() {
-        override fun onAppStatusChanged(pluggedDevice: BluetoothDevice?, registered: Boolean) {
-            super.onAppStatusChanged(pluggedDevice, registered)
-            Log.d(TAG, "onAppStatusChanged: registered=$registered")
-        }
+    private val callback by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            object : BluetoothHidDevice.Callback() {
+                override fun onAppStatusChanged(pluggedDevice: BluetoothDevice?, registered: Boolean) {
+                    super.onAppStatusChanged(pluggedDevice, registered)
+                    Log.d(TAG, "onAppStatusChanged: registered=$registered")
+                }
 
-        override fun onConnectionStateChanged(device: BluetoothDevice, state: Int) {
-            super.onConnectionStateChanged(device, state)
-            Log.d(TAG, "onConnectionStateChanged: device=${device.address}, state=$state")
-        }
+                override fun onConnectionStateChanged(device: BluetoothDevice, state: Int) {
+                    super.onConnectionStateChanged(device, state)
+                    Log.d(TAG, "onConnectionStateChanged: device=${device.address}, state=$state")
+                }
+            }
+        } else null
     }
 
     @SuppressLint("MissingPermission")
+    @RequiresApi(Build.VERSION_CODES.P)
     fun registerApp(proxy: BluetoothHidDevice) {
         this.hidDevice = proxy
         val outQos = BluetoothHidDeviceAppQosSettings(
@@ -109,7 +120,14 @@ class HidDeviceManager(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
+    @RequiresApi(Build.VERSION_CODES.P)
     fun unregisterApp() {
         hidDevice?.unregisterApp()
+    }
+
+    @SuppressLint("MissingPermission")
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun sendReport(device: BluetoothDevice, id: Int, report: ByteArray): Boolean {
+        return hidDevice?.sendReport(device, id, report) ?: false
     }
 }
