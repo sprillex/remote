@@ -125,7 +125,7 @@
 - **Core Technical Requirements:** Android USB Host API integration.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 5.6: Implement Flipper Zero BLE serial bridge sending direct `ir tx` CLI commands. [EASY]
+### Task 5.6: Implement Flipper Zero BLE serial bridge sending direct `ir tx` CLI commands. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/bluetooth/FlipperBridge.kt` (Create)
 - **Core Technical Requirements:** Connect to Flipper's serial BLE service.
 - **Verification Criteria:** `./gradlew lint`
