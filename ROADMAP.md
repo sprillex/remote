@@ -159,9 +159,9 @@ data class ButtonMappingEntity(
 │   ├── [x] Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay.
 │   └── [x] Task 1.5: Implement BLE GATT Client connection manager using Nordic UART Service (NUS) protocol.
 │
-├── Phase 2: ESP32-S2/S3 Dongle Firmware (High Priority) [Audit Complete - Unstarted]
+├── Phase 2: ESP32-S2/S3 Dongle Firmware (High Priority) [Audit Complete - In Progress]
 │   ├── [x] Task 2.1: Bootstrap PlatformIO project with native TinyUSB stack for ESP32-S2/S3.
-│   ├── [ ] Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs.
+│   ├── [x] Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs.
 │   ├── [x] Task 2.3: Implement NimBLE GATT NUS service receiving binary command frames.
 │   ├── [ ] Task 2.4: Implement thread-safe FIFO ring buffer bridging BLE payloads to USB HID endpoints.
 │   └── [x] Task 2.5: Add hardware pairing bond security and static PIN authentication.
