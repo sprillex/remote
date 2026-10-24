@@ -1,9 +1,12 @@
 #include <Arduino.h>
+#include "ble_nus.h"
 
 void setup() {
-  // put your setup code here, to run once:
+  Serial.begin(115200);
+  setupBleNus();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  processBleTasks();
+  delay(10);
 }

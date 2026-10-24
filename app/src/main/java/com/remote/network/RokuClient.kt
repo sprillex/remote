@@ -2,14 +2,21 @@ package com.remote.network
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.net.HttpURLConnection
-import java.net.URL
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.URLEncoder
+import java.util.concurrent.TimeUnit
 
 class RokuClient(
     private val connectTimeoutMs: Int = 3000,
     private val readTimeoutMs: Int = 3000
 ) {
+
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(connectTimeoutMs.toLong(), TimeUnit.MILLISECONDS)
+        .readTimeout(readTimeoutMs.toLong(), TimeUnit.MILLISECONDS)
+        .build()
 
     companion object {
         const val ECP_PORT = 8060
@@ -83,23 +90,18 @@ class RokuClient(
     }
 
     private fun executePostRequest(urlString: String): Boolean {
-        var connection: HttpURLConnection? = null
         return try {
-            val url = URL(urlString)
-            connection = (url.openConnection() as HttpURLConnection).apply {
-                requestMethod = "POST"
-                connectTimeout = connectTimeoutMs
-                readTimeout = readTimeoutMs
-                doOutput = true
-                setFixedLengthStreamingMode(0)
-            }
+            val request = Request.Builder()
+                .url(urlString)
+                .post(ByteArray(0).toRequestBody(null))
+                .build()
 
-            val responseCode = connection.responseCode
-            responseCode in 200..299
+            val response = httpClient.newCall(request).execute()
+            response.use {
+                it.isSuccessful
+            }
         } catch (e: Exception) {
             false
-        } finally {
-            connection?.disconnect()
         }
     }
 }

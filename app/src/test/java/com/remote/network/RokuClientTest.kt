@@ -1,6 +1,8 @@
 package com.remote.network
 
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class RokuClientTest {
@@ -27,5 +29,13 @@ class RokuClientTest {
         assertEquals("Power", RokuClient.KEY_POWER)
         assertEquals("Play", RokuClient.KEY_PLAY)
         assertEquals("VolumeUp", RokuClient.KEY_VOLUME_UP)
+    }
+
+    @Test
+    fun testSendKeypress_InvalidHost_ReturnsFalse() = runBlocking {
+        // A non-routable IP with a short timeout will fail quickly and verify exception handling
+        val shortTimeoutClient = RokuClient(connectTimeoutMs = 10, readTimeoutMs = 10)
+        val result = shortTimeoutClient.sendKeypress("10.255.255.255", RokuClient.KEY_HOME)
+        assertFalse("Expected failure for invalid host", result)
     }
 }
