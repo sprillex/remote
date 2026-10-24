@@ -35,7 +35,7 @@
 - **Core Technical Requirements:** SSH connection via net.schmizz:sshj with local key management.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming. [EASY]
+### Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/network/SshSession.kt` (Create)
 - **Core Technical Requirements:** Channel execution for remote ssh targets.
 - **Verification Criteria:** `./gradlew test`
