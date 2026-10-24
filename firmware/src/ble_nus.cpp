@@ -8,6 +8,13 @@
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
+// Protocol Opcodes
+#define OPCODE_HID     0x01
+#define OPCODE_IR_NEC  0x02
+#define OPCODE_IR_SONY 0x03
+#define OPCODE_IR_RC5  0x04
+#define OPCODE_IR_RAW  0x05
+
 NimBLEServer *pServer = NULL;
 NimBLECharacteristic * pTxCharacteristic;
 
@@ -29,16 +36,28 @@ class MyCallbacks: public NimBLECharacteristicCallbacks {
       std::string rxValue = pCharacteristic->getValue();
 
       if (rxValue.length() > 0) {
-        // Push incoming binary command frames to FreeRTOS queue
-        HidReport report = {0};
-        size_t len = rxValue.length();
-        if (len > sizeof(HidReport)) {
-            len = sizeof(HidReport);
-        }
-        memcpy(&report, rxValue.data(), len);
+        uint8_t opcode = rxValue[0];
 
-        if (xQueueSend(bleRxQueue, &report, 0) != pdPASS) {
-            // Queue full, drop packet
+        if (opcode == OPCODE_HID) {
+            // Push incoming HID command frames to FreeRTOS queue
+            HidReport report = {0};
+            size_t payload_len = rxValue.length() - 1;
+            if (payload_len > sizeof(HidReport)) {
+                payload_len = sizeof(HidReport);
+            }
+            if (payload_len > 0) {
+                memcpy(&report, rxValue.data() + 1, payload_len);
+                if (xQueueSend(bleRxQueue, &report, 0) != pdPASS) {
+                    // Queue full, drop packet
+                }
+            }
+        } else if (opcode == OPCODE_IR_NEC || opcode == OPCODE_IR_SONY ||
+                   opcode == OPCODE_IR_RC5 || opcode == OPCODE_IR_RAW) {
+            // Safely drop IR frames for now, to be implemented in Task 5.1
+            Serial.printf("Received IR opcode: 0x%02X, length: %d\n", opcode, rxValue.length());
+        } else {
+            // Unknown opcode, drop
+            Serial.printf("Received unknown opcode: 0x%02X\n", opcode);
         }
       }
     }

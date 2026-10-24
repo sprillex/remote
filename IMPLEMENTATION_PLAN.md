@@ -50,7 +50,7 @@
 - **Core Technical Requirements:** RMT peripheral integration for 38kHz infrared transmission.
 - **Verification Criteria:** `cd firmware && pio check`
 
-### Task 5.2: Update BLE frame specification to handle IR protocol opcodes (NEC, Sony, RC5, Raw). [EASY]
+### Task 5.2: Update BLE frame specification to handle IR protocol opcodes (NEC, Sony, RC5, Raw). [RESOLVED]
 - **Target Files:** `firmware/src/ble_nus.cpp` (Modify)
 - **Core Technical Requirements:** Protocol expansion for IR packets.
 - **Verification Criteria:** `cd firmware && pio check`
