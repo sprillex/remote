@@ -40,7 +40,7 @@
 - **Core Technical Requirements:** Channel execution for remote ssh targets.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS). [HARD]
+### Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS). [RESOLVED]
 - **Target Files:** `scripts/pi_gadget.sh` (Create)
 - **Core Technical Requirements:** Bash script configuring Linux ConfigFS.
 - **Verification Criteria:** `shellcheck scripts/pi_gadget.sh`
