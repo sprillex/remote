@@ -170,14 +170,14 @@ data class ButtonMappingEntity(
 │   ├── [x] Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs.
 │   ├── [x] Task 3.2: Implement single-link DeviceConnectionRouter using Disconnect-Before-Connect lifecycle.
 │   ├── [x] Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions.
-│   ├── [ ] Task 3.4: Build dynamic Compose UI surfaces (Full Keyboard, D-Pad TV Remote, Media Bar, Macro Pad).
+│   ├── [x] Task 3.4: Build dynamic Compose UI surfaces (Full Keyboard, D-Pad TV Remote, Media Bar, Macro Pad).
 │   └── [x] Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles.
 │
 ├── Phase 4: Network Transport Extensions (Low Priority) [Audit Complete - Unstarted]
 │   ├── [x] Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints).
 │   ├── [ ] Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback.
 │   ├── [ ] Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation.
-│   ├── [ ] Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming.
+│   ├── [x] Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming.
 │   └── [ ] Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
 │
 └── Phase 5: Infrared Subsystem Extensions (Low Priority) [Audit Complete - Unstarted]

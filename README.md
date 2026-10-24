@@ -31,6 +31,14 @@ To build, test, and deploy this project, the following dependencies are required
 
 Follow these exact steps to prepare the local development environment:
 
+### System Packages (Debian/Ubuntu/Mint)
+
+Install the required packages non-interactively:
+
+```bash
+sudo apt-get update && sudo apt-get install -y curl git python3-venv
+```
+
 ### Android Application
 
 1. **Clone the repository:**

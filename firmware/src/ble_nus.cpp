@@ -2,6 +2,7 @@
 #include <NimBLEDevice.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
+#include "ring_buffer.h"
 
 #define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
@@ -29,17 +30,22 @@ class MyCallbacks: public NimBLECharacteristicCallbacks {
 
       if (rxValue.length() > 0) {
         // Push incoming binary command frames to FreeRTOS queue
-        std::string* queuedValue = new std::string(rxValue);
-        if (xQueueSend(bleRxQueue, &queuedValue, 0) != pdPASS) {
+        HidReport report = {0};
+        size_t len = rxValue.length();
+        if (len > sizeof(HidReport)) {
+            len = sizeof(HidReport);
+        }
+        memcpy(&report, rxValue.data(), len);
+
+        if (xQueueSend(bleRxQueue, &report, 0) != pdPASS) {
             // Queue full, drop packet
-            delete queuedValue;
         }
       }
     }
 };
 
 void setupBleNus() {
-  bleRxQueue = xQueueCreate(10, sizeof(std::string*));
+  bleRxQueue = xQueueCreate(10, sizeof(HidReport));
 
   NimBLEDevice::init("NimBLE_NUS");
 
@@ -69,17 +75,17 @@ void setupBleNus() {
 }
 
 void processBleTasks() {
-  std::string* rxValue;
-  if (xQueueReceive(bleRxQueue, &rxValue, 0) == pdPASS) {
+  HidReport report;
+  if (xQueueReceive(bleRxQueue, &report, 0) == pdPASS) {
     // Parse incoming binary command frames
     Serial.println("*********");
     Serial.print("Received Value: ");
-    for (int i = 0; i < rxValue->length(); i++) {
-      Serial.print((uint8_t)(*rxValue)[i], HEX);
+    uint8_t* rawData = (uint8_t*)&report;
+    for (size_t i = 0; i < sizeof(HidReport); i++) {
+      Serial.print(rawData[i], HEX);
       Serial.print(" ");
     }
     Serial.println();
     Serial.println("*********");
-    delete rxValue;
   }
 }
