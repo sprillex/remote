@@ -9,6 +9,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import java.util.concurrent.Executors
 
 class HidDeviceManager(private val context: Context) {
 
@@ -95,6 +96,8 @@ class HidDeviceManager(private val context: Context) {
         } else null
     }
 
+    private val executor = Executors.newSingleThreadExecutor()
+
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.P)
     fun registerApp(proxy: BluetoothHidDevice) {
@@ -116,7 +119,7 @@ class HidDeviceManager(private val context: Context) {
             -1
         )
 
-        proxy.registerApp(sdpSettings, inQos, outQos, { it.run() }, callback)
+        proxy.registerApp(sdpSettings, inQos, outQos, executor, callback)
     }
 
     @SuppressLint("MissingPermission")
