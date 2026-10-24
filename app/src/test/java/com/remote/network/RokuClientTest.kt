@@ -3,6 +3,7 @@ package com.remote.network
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RokuClientTest {
@@ -36,6 +37,6 @@ class RokuClientTest {
         // A non-routable IP with a short timeout will fail quickly and verify exception handling
         val shortTimeoutClient = RokuClient(connectTimeoutMs = 10, readTimeoutMs = 10)
         val result = shortTimeoutClient.sendKeypress("10.255.255.255", RokuClient.KEY_HOME)
-        assertFalse("Expected failure for invalid host", result)
+        assertTrue("Expected failure for invalid host", result.isFailure)
     }
 }
