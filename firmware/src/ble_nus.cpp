@@ -15,6 +15,13 @@
 #define OPCODE_IR_RC5  0x04
 #define OPCODE_IR_RAW  0x05
 
+extern "C" {
+    void sendIR_NEC(const uint8_t* payload, size_t len);
+    void sendIR_SONY(const uint8_t* payload, size_t len);
+    void sendIR_RC5(const uint8_t* payload, size_t len);
+    void sendIR_RAW(const uint8_t* payload, size_t len);
+}
+
 NimBLEServer *pServer = NULL;
 NimBLECharacteristic * pTxCharacteristic;
 
@@ -53,8 +60,18 @@ class MyCallbacks: public NimBLECharacteristicCallbacks {
             }
         } else if (opcode == OPCODE_IR_NEC || opcode == OPCODE_IR_SONY ||
                    opcode == OPCODE_IR_RC5 || opcode == OPCODE_IR_RAW) {
-            // Safely drop IR frames for now, to be implemented in Task 5.1
-            Serial.printf("Received IR opcode: 0x%02X, length: %d\n", opcode, rxValue.length());
+            size_t payload_len = rxValue.length() > 1 ? rxValue.length() - 1 : 0;
+            const uint8_t* payload = (const uint8_t*)rxValue.data() + 1;
+            if (opcode == OPCODE_IR_NEC) {
+                sendIR_NEC(payload, payload_len);
+            } else if (opcode == OPCODE_IR_SONY) {
+                sendIR_SONY(payload, payload_len);
+            } else if (opcode == OPCODE_IR_RC5) {
+                sendIR_RC5(payload, payload_len);
+            } else if (opcode == OPCODE_IR_RAW) {
+                sendIR_RAW(payload, payload_len);
+            }
+            Serial.printf("Processed IR opcode: 0x%02X, length: %d\n", opcode, rxValue.length());
         } else {
             // Unknown opcode, drop
             Serial.printf("Received unknown opcode: 0x%02X\n", opcode);
