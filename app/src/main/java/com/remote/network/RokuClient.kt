@@ -1,6 +1,7 @@
 package com.remote.network
 
 import kotlinx.coroutines.Dispatchers
+import android.util.Log
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -49,22 +50,22 @@ class RokuClient(
         return "http://$host:$port/$path"
     }
 
-    suspend fun sendKeypress(host: String, key: String, port: Int = ECP_PORT): Boolean = withContext(Dispatchers.IO) {
+    suspend fun sendKeypress(host: String, key: String, port: Int = ECP_PORT): Result<Boolean> = withContext(Dispatchers.IO) {
         val url = buildUrl(host, port, "keypress/$key")
         return@withContext executePostRequest(url)
     }
 
-    suspend fun sendKeyDown(host: String, key: String, port: Int = ECP_PORT): Boolean = withContext(Dispatchers.IO) {
+    suspend fun sendKeyDown(host: String, key: String, port: Int = ECP_PORT): Result<Boolean> = withContext(Dispatchers.IO) {
         val url = buildUrl(host, port, "keydown/$key")
         return@withContext executePostRequest(url)
     }
 
-    suspend fun sendKeyUp(host: String, key: String, port: Int = ECP_PORT): Boolean = withContext(Dispatchers.IO) {
+    suspend fun sendKeyUp(host: String, key: String, port: Int = ECP_PORT): Result<Boolean> = withContext(Dispatchers.IO) {
         val url = buildUrl(host, port, "keyup/$key")
         return@withContext executePostRequest(url)
     }
 
-    suspend fun sendTextCharacter(host: String, char: Char, port: Int = ECP_PORT): Boolean = withContext(Dispatchers.IO) {
+    suspend fun sendTextCharacter(host: String, char: Char, port: Int = ECP_PORT): Result<Boolean> = withContext(Dispatchers.IO) {
         val encodedChar = URLEncoder.encode(char.toString(), "UTF-8").replace("+", "%20")
         val url = buildUrl(host, port, "keypress/Lit_$encodedChar")
         return@withContext executePostRequest(url)
@@ -75,21 +76,27 @@ class RokuClient(
         text: String,
         port: Int = ECP_PORT,
         interKeyDelayMs: Long = 20L
-    ): Boolean = withContext(Dispatchers.IO) {
+    ): Result<Boolean> = withContext(Dispatchers.IO) {
         var allSuccess = true
+        var lastFailure: Throwable? = null
         for (char in text) {
-            val success = sendTextCharacter(host, char, port)
-            if (!success) {
+            val result = sendTextCharacter(host, char, port)
+            if (result.isFailure) {
+                lastFailure = result.exceptionOrNull()
                 allSuccess = false
+                break // Break early on failure as per code review feedback
+            } else if (result.getOrNull() == false) {
+                allSuccess = false
+                break // Break early on failure as per code review feedback
             }
             if (interKeyDelayMs > 0) {
                 kotlinx.coroutines.delay(interKeyDelayMs)
             }
         }
-        allSuccess
+        return@withContext if (lastFailure != null) Result.failure(lastFailure) else Result.success(allSuccess)
     }
 
-    private fun executePostRequest(urlString: String): Boolean {
+    private fun executePostRequest(urlString: String): Result<Boolean> {
         return try {
             val request = Request.Builder()
                 .url(urlString)
@@ -97,11 +104,19 @@ class RokuClient(
                 .build()
 
             val response = httpClient.newCall(request).execute()
-            response.use {
+            val success = response.use {
                 it.isSuccessful
             }
+            Result.success(success)
         } catch (e: Exception) {
-            false
+            try {
+                Log.e("RokuClient", "Network exception", e)
+            } catch (mockError: Throwable) {
+                // Fallback for tests if Log is not mocked
+                println("RokuClient Network exception: ${e.message}")
+                e.printStackTrace()
+            }
+            Result.failure(e)
         }
     }
 }
