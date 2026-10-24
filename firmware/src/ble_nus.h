@@ -4,5 +4,6 @@
 #include <Arduino.h>
 
 void setupBleNus();
+void processBleTasks();
 
 #endif // BLE_NUS_H

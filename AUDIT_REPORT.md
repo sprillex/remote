@@ -10,7 +10,8 @@ The repository presents a solid foundation for a multi-target remote control app
   - Fix rationale: Provided a dedicated SingleThreadExecutor to handle HID callbacks, avoiding binder thread deadlocks and ANRs.
 
 ## P1: Concurrency, Error Handling & Logic Bugs
-- [ ] `[P1-01][HARD]` `Blocking I/O in BLE Task`: `firmware/src/ble_nus.cpp:34` - Using `Serial.println` inside `onWrite` callback can block the NimBLE stack task, leading to watchdog resets or connection drops. Trigger condition: Receiving large UART frames over BLE. Proposed fix: Push data to a FreeRTOS ring buffer/queue and process logging/parsing in the main application loop.
+- [x] `[P1-01][HARD]` `Blocking I/O in BLE Task`: `firmware/src/ble_nus.cpp:34` - Using `Serial.println` inside `onWrite` callback can block the NimBLE stack task, leading to watchdog resets or connection drops. Trigger condition: Receiving large UART frames over BLE. Proposed fix: Push data to a FreeRTOS ring buffer/queue and process logging/parsing in the main application loop.
+  - Fix rationale: Implemented FreeRTOS ring buffer (`bleRxQueue`) to push BLE task data and process logging in the main application loop, preventing watchdog resets.
 - [ ] `[P1-02][EASY]` `Swallowed Network Exceptions`: `app/src/main/java/com/remote/network/RokuClient.kt:100` - Catching generic `Exception` without logging hides critical connection failures (e.g., timeouts, unreachable hosts). Failure state: Silent failure of remote commands. Proposed fix: Log exception details and return a distinct error type (Result/Either).
 
 ## P2: Performance Hotspots & Resource Management
