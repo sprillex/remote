@@ -1,0 +1,68 @@
+package com.remote.network
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class SsdpDiscoveryTest {
+
+    private val discovery = SsdpDiscovery()
+
+    @Test
+    fun testParseLocationIp_ValidHeader() {
+        val response = """
+            HTTP/1.1 200 OK
+            Cache-Control: max-age=3600
+            ST: roku:ecp
+            USN: uuid:roku:ecp:1234567890
+            Ext:
+            Server: Roku UPnP/1.0 MiniUPnPd/1.4
+            LOCATION: http://192.168.1.15:8060/
+        """.trimIndent()
+
+        val ip = discovery.parseLocationIp(response)
+        assertEquals("192.168.1.15", ip)
+    }
+
+    @Test
+    fun testParseLocationIp_ValidHeader_MixedCase() {
+        val response = """
+            HTTP/1.1 200 OK
+            Location: http://10.0.0.5:8060/
+        """.trimIndent()
+
+        val ip = discovery.parseLocationIp(response)
+        assertEquals("10.0.0.5", ip)
+    }
+
+    @Test
+    fun testParseLocationIp_InvalidOrMissingHeader() {
+        val response = """
+            HTTP/1.1 200 OK
+            Cache-Control: max-age=3600
+            ST: roku:ecp
+            Server: Roku UPnP/1.0
+        """.trimIndent()
+
+        val ip = discovery.parseLocationIp(response)
+        assertNull(ip)
+    }
+
+    @Test
+    fun testGetSubnetAddresses_ValidIp() {
+        val ips = discovery.getSubnetAddresses("192.168.1.100")
+        assertEquals(254, ips.size)
+        assertEquals("192.168.1.1", ips.first())
+        assertEquals("192.168.1.254", ips.last())
+        assertEquals("192.168.1.15", ips[14])
+    }
+
+    @Test
+    fun testGetSubnetAddresses_InvalidIp() {
+        val ips = discovery.getSubnetAddresses("invalid_ip")
+        assertEquals(0, ips.size)
+
+        val ips2 = discovery.getSubnetAddresses("192.168.1")
+        assertEquals(0, ips2.size)
+    }
+}

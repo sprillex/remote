@@ -25,7 +25,7 @@
 - **Core Technical Requirements:** Adaptive UI grids and buttons for different connection types.
 - **Verification Criteria:** `./gradlew lint`
 
-### Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback. [HARD]
+### Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/network/SsdpDiscovery.kt` (Create)
 - **Core Technical Requirements:** Multicast UDP sockets for auto-discovering Roku devices.
 - **Verification Criteria:** `./gradlew test`
@@ -50,7 +50,7 @@
 - **Core Technical Requirements:** RMT peripheral integration for 38kHz infrared transmission.
 - **Verification Criteria:** `cd firmware && pio check`
 
-### Task 5.2: Update BLE frame specification to handle IR protocol opcodes (NEC, Sony, RC5, Raw). [EASY]
+### Task 5.2: Update BLE frame specification to handle IR protocol opcodes (NEC, Sony, RC5, Raw). [RESOLVED]
 - **Target Files:** `firmware/src/ble_nus.cpp` (Modify)
 - **Core Technical Requirements:** Protocol expansion for IR packets.
 - **Verification Criteria:** `cd firmware && pio check`
