@@ -176,7 +176,7 @@ data class ButtonMappingEntity(
 ├── Phase 4: Network Transport Extensions (Low Priority) [Audit Complete - Unstarted]
 │   ├── [x] Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints).
 │   ├── [x] Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback.
-│   ├── [ ] Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation.
+│   ├── [x] Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation.
 │   ├── [x] Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming.
 │   └── [ ] Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
 │
