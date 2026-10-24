@@ -25,7 +25,7 @@
 - **Core Technical Requirements:** Adaptive UI grids and buttons for different connection types.
 - **Verification Criteria:** `./gradlew lint`
 
-### Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback. [HARD]
+### Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/network/SsdpDiscovery.kt` (Create)
 - **Core Technical Requirements:** Multicast UDP sockets for auto-discovering Roku devices.
 - **Verification Criteria:** `./gradlew test`
