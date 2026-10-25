@@ -3,14 +3,17 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include "ring_buffer.h"
-#include "ir_tx.h"
 
 #define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
-#include "protocol.h"
 // Protocol Opcodes
+#define OPCODE_HID     0x01
+#define OPCODE_IR_NEC  0x02
+#define OPCODE_IR_SONY 0x03
+#define OPCODE_IR_RC5  0x04
+#define OPCODE_IR_RAW  0x05
 
 NimBLEServer *pServer = NULL;
 NimBLECharacteristic * pTxCharacteristic;
@@ -50,20 +53,8 @@ class MyCallbacks: public NimBLECharacteristicCallbacks {
             }
         } else if (opcode == OPCODE_IR_NEC || opcode == OPCODE_IR_SONY ||
                    opcode == OPCODE_IR_RC5 || opcode == OPCODE_IR_RAW) {
-            IrReport report = {0};
-            report.opcode = opcode;
-            size_t payload_len = rxValue.length() - 1;
-            if (payload_len > MAX_IR_PAYLOAD_SIZE) {
-                payload_len = MAX_IR_PAYLOAD_SIZE;
-            }
-            report.length = payload_len;
-            if (payload_len > 0) {
-                memcpy(report.data, rxValue.data() + 1, payload_len);
-            }
-            if (xQueueSend(irTxQueue, &report, 0) != pdPASS) {
-                // Queue full, drop packet
-                Serial.println("IR Queue full, dropped packet");
-            }
+            // Safely drop IR frames for now, to be implemented in Task 5.1
+            Serial.printf("Received IR opcode: 0x%02X, length: %d\n", opcode, rxValue.length());
         } else {
             // Unknown opcode, drop
             Serial.printf("Received unknown opcode: 0x%02X\n", opcode);
