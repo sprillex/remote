@@ -30,7 +30,7 @@
 - **Core Technical Requirements:** Multicast UDP sockets for auto-discovering Roku devices.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation. [HARD]
+### Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation. [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/network/SshClient.kt` (Create)
 - **Core Technical Requirements:** SSH connection via net.schmizz:sshj with local key management.
 - **Verification Criteria:** `./gradlew test`

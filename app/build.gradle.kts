@@ -51,6 +51,7 @@ android {
 }
 
 dependencies {
+    implementation("com.hierynomus:sshj:0.37.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
