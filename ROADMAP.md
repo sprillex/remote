@@ -181,7 +181,7 @@ data class ButtonMappingEntity(
 │   └── [x] Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
 │
 └── Phase 5: Infrared Subsystem Extensions (Low Priority) [Audit Complete - Unstarted]
-    ├── [ ] Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library.
+    ├── [x] Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library.
     ├── [x] Task 5.2: Update BLE frame specification to handle IR protocol opcodes (NEC, Sony, RC5, Raw).
     ├── [x] Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters.
     ├── [ ] Task 5.4: Build AudioTrack 19kHz dual-channel phase-inverted carrier generator for 3.5mm adapters.
@@ -217,5 +217,5 @@ data class ButtonMappingEntity(
 ### Milestone 5: SSH & IR Modules
 **Status:** [Audit Complete - Unstarted]
 - [ ] App generates Ed25519 keypair and successfully authenticates against target SSH server.
-- [ ] ESP32 RMT peripheral outputs calibrated 38kHz square wave driving IR LED to control target TV.
+- [x] ESP32 RMT peripheral outputs calibrated 38kHz square wave driving IR LED to control target TV.
 - [ ] AudioTrack module produces 19kHz stereo audio file without DAC distortion when volume is set to 100%.

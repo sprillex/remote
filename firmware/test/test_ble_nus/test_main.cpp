@@ -42,6 +42,7 @@ void test_opcode_parsing_hid_frame(void) {
     // We can simulate parsing logic here since onWrite is embedded:
     uint8_t rxData[] = {0x01, 0x02, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00}; // HID Opcode + Modifiers + Key1
     size_t length = sizeof(rxData);
+    (void)length;
 
     uint8_t opcode = rxData[0];
     TEST_ASSERT_EQUAL(0x01, opcode); // OPCODE_HID
@@ -59,6 +60,7 @@ void test_opcode_parsing_hid_frame(void) {
 void test_opcode_parsing_ir_frame(void) {
     uint8_t rxData[] = {0x02, 0x00, 0xFF, 0x00, 0xAA}; // IR NEC Opcode
     size_t length = sizeof(rxData);
+    (void)length;
 
     uint8_t opcode = rxData[0];
     TEST_ASSERT_EQUAL(0x02, opcode); // OPCODE_IR_NEC
