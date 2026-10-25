@@ -9,9 +9,10 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.InetSocketAddress
-import java.net.Socket
 import java.net.SocketTimeoutException
+import java.nio.channels.SocketChannel
 import java.util.regex.Pattern
+import kotlinx.coroutines.runInterruptible
 
 class SsdpDiscovery(
     private val ssdpTimeoutMs: Int = 3000,
@@ -120,18 +121,21 @@ class SsdpDiscovery(
     }
 
     private suspend fun checkPortOpen(ip: String, port: Int, timeout: Int): String? = withContext(Dispatchers.IO) {
-        var socket: Socket? = null
+        var channel: SocketChannel? = null
         try {
             withTimeoutOrNull(timeout.toLong() + 100) {
-                socket = Socket()
-                socket?.connect(InetSocketAddress(ip, port), timeout)
+                runInterruptible {
+                    channel = SocketChannel.open()
+                    channel?.configureBlocking(true)
+                    channel?.socket()?.connect(InetSocketAddress(ip, port), timeout)
+                }
                 ip // return IP if successful
             }
         } catch (e: Exception) {
             null
         } finally {
             try {
-                socket?.close()
+                channel?.close()
             } catch (e: Exception) {
                 // ignore close errors
             }

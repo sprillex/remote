@@ -3,6 +3,13 @@ package com.remote.network
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import kotlinx.coroutines.runBlocking
+import kotlin.system.measureTimeMillis
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import org.junit.Assert.assertTrue
+import kotlinx.coroutines.cancelAndJoin
 
 class SsdpDiscoveryTest {
 
@@ -64,5 +71,24 @@ class SsdpDiscoveryTest {
 
         val ips2 = discovery.getSubnetAddresses("192.168.1")
         assertEquals(0, ips2.size)
+    }
+
+    @Test
+    fun testPortOpenCancellation() = runBlocking {
+        // Create an instance of SsdpDiscovery with 0ms ssdp and 5000ms sweep timeout
+        val testDiscovery = SsdpDiscovery(ssdpTimeoutMs = 0, sweepTimeoutMs = 5000)
+
+        val time = measureTimeMillis {
+            val job = launch(Dispatchers.IO) {
+                // Give it a blackhole IP subnet. The sweep will try to connect to 10.255.255.1-254
+                // Each would block for 5000ms if not cancelled.
+                testDiscovery.discoverRokuDevices("10.255.255.10")
+            }
+            delay(500)
+            job.cancelAndJoin()
+        }
+
+        // Ensure it took less time than the timeout
+        assertTrue("Cancellation should stop connection promptly, took $time ms", time < 2000)
     }
 }
