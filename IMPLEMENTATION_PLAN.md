@@ -30,7 +30,7 @@
 - **Core Technical Requirements:** Multicast UDP sockets for auto-discovering Roku devices.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation. [RESOLVED]
+### Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation. [HARD]
 - **Target Files:** `app/src/main/java/com/remote/network/SshClient.kt` (Create)
 - **Core Technical Requirements:** SSH connection via net.schmizz:sshj with local key management.
 - **Verification Criteria:** `./gradlew test`
@@ -40,12 +40,12 @@
 - **Core Technical Requirements:** Channel execution for remote ssh targets.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS). [RESOLVED]
+### Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS). [HARD]
 - **Target Files:** `scripts/pi_gadget.sh` (Create)
 - **Core Technical Requirements:** Bash script configuring Linux ConfigFS.
 - **Verification Criteria:** `shellcheck scripts/pi_gadget.sh`
 
-### Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library. [RESOLVED]
+### Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library. [HARD]
 - **Target Files:** `firmware/src/ir_tx.cpp` (Create)
 - **Core Technical Requirements:** RMT peripheral integration for 38kHz infrared transmission.
 - **Verification Criteria:** `cd firmware && pio check`
