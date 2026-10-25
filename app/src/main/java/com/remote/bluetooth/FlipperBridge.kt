@@ -1,19 +1,20 @@
 package com.remote.bluetooth
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothProfile
 import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 
-@SuppressLint("MissingPermission")
 class FlipperBridge(private val context: Context? = null) {
 
     companion object {
@@ -35,6 +36,14 @@ class FlipperBridge(private val context: Context? = null) {
         }
     }
 
+    private fun hasPermission(): Boolean {
+        if (context == null) return false
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            return ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+        }
+        return true
+    }
+
     private var bluetoothGatt: BluetoothGatt? = null
     private var rxCharacteristic: BluetoothGattCharacteristic? = null
     private var txCharacteristic: BluetoothGattCharacteristic? = null
@@ -52,7 +61,15 @@ class FlipperBridge(private val context: Context? = null) {
             _connectionState.tryEmit(newState)
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.d(TAG, "Discovering services...")
-                gatt.discoverServices()
+                if (hasPermission()) {
+                    try {
+                        gatt.discoverServices()
+                    } catch (e: SecurityException) {
+                        Log.e(TAG, "SecurityException on discoverServices", e)
+                    }
+                } else {
+                    Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
+                }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d(TAG, "Disconnected")
                 close()
@@ -61,35 +78,78 @@ class FlipperBridge(private val context: Context? = null) {
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             super.onServicesDiscovered(gatt, status)
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                val service = gatt.getService(FLIPPER_SERIAL_SERVICE_UUID)
-                if (service != null) {
-                    rxCharacteristic = service.getCharacteristic(FLIPPER_SERIAL_RX_CHAR_UUID)
-                    txCharacteristic = service.getCharacteristic(FLIPPER_SERIAL_TX_CHAR_UUID)
-                    txCharacteristic?.let { tx ->
-                        gatt.setCharacteristicNotification(tx, true)
-                    }
-                } else {
-                    Log.w(TAG, "Flipper serial service not found")
+
+            if (status != BluetoothGatt.GATT_SUCCESS) {
+                Log.e(TAG, "Service discovery failed with status: $status")
+                return
+            }
+
+            if (!hasPermission()) {
+                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission in onServicesDiscovered")
+                return
+            }
+
+            val service = gatt.getService(FLIPPER_SERIAL_SERVICE_UUID)
+            if (service == null) {
+                Log.w(TAG, "Flipper serial service not found")
+                return
+            }
+
+            rxCharacteristic = service.getCharacteristic(FLIPPER_SERIAL_RX_CHAR_UUID)
+            txCharacteristic = service.getCharacteristic(FLIPPER_SERIAL_TX_CHAR_UUID)
+
+            val tx = txCharacteristic
+            if (tx != null) {
+                try {
+                    gatt.setCharacteristicNotification(tx, true)
+                } catch (e: SecurityException) {
+                    Log.e(TAG, "SecurityException on setCharacteristicNotification", e)
                 }
             }
         }
 
         override fun onCharacteristicChanged(
             gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray
+        ) {
+            super.onCharacteristicChanged(gatt, characteristic, value)
+            if (characteristic.uuid == FLIPPER_SERIAL_TX_CHAR_UUID) {
+                val text = String(value, StandardCharsets.UTF_8)
+                _receivedResponse.tryEmit(text)
+            }
+        }
+
+        @Deprecated("Deprecated in Java")
+        @Suppress("DEPRECATION")
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
             characteristic: BluetoothGattCharacteristic
         ) {
             super.onCharacteristicChanged(gatt, characteristic)
             if (characteristic.uuid == FLIPPER_SERIAL_TX_CHAR_UUID) {
-                val text = String(characteristic.value ?: byteArrayOf(), StandardCharsets.UTF_8)
-                _receivedResponse.tryEmit(text)
+                try {
+                    val value = characteristic.value ?: byteArrayOf()
+                    val text = String(value, StandardCharsets.UTF_8)
+                    _receivedResponse.tryEmit(text)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Exception on onCharacteristicChanged", e)
+                }
             }
         }
     }
 
     fun connect(device: BluetoothDevice) {
         context?.let { ctx ->
-            bluetoothGatt = device.connectGatt(ctx, false, gattCallback)
+            if (hasPermission()) {
+                try {
+                    bluetoothGatt = device.connectGatt(ctx, false, gattCallback)
+                } catch (e: SecurityException) {
+                    Log.e(TAG, "SecurityException on connect", e)
+                }
+            } else {
+                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
+            }
         }
     }
 
@@ -98,20 +158,39 @@ class FlipperBridge(private val context: Context? = null) {
         return sendRawSerialData(payload)
     }
 
+    @Suppress("DEPRECATION")
     fun sendRawSerialData(data: ByteArray): Boolean {
         val gatt = bluetoothGatt ?: return false
         val rx = rxCharacteristic ?: return false
 
-        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            gatt.writeCharacteristic(rx, data, rx.writeType) == android.bluetooth.BluetoothStatusCodes.SUCCESS
-        } else {
-            rx.value = data
-            gatt.writeCharacteristic(rx)
+        if (hasPermission()) {
+            try {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    return gatt.writeCharacteristic(rx, data, rx.writeType) == android.bluetooth.BluetoothStatusCodes.SUCCESS
+                } else {
+                    rx.value = data
+                    return gatt.writeCharacteristic(rx)
+                }
+            } catch (e: SecurityException) {
+                Log.e(TAG, "SecurityException on sendData", e)
+                return false
+            }
         }
+
+        Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
+        return false
     }
 
     fun close() {
-        bluetoothGatt?.close()
+        if (hasPermission()) {
+            try {
+                bluetoothGatt?.close()
+            } catch (e: SecurityException) {
+                Log.e(TAG, "SecurityException on close", e)
+            }
+        } else if (context != null) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission for closing")
+        }
         bluetoothGatt = null
         rxCharacteristic = null
         txCharacteristic = null

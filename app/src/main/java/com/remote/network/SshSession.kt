@@ -1,9 +1,13 @@
 package com.remote.network
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.yield
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.io.OutputStream
@@ -64,8 +68,13 @@ class SshSession(private val sshClient: SshClientWrapper) {
 
             val inputStream = shell.inputStream
             val buffer = ByteArray(1024)
-            while (true) {
-                val bytesRead = inputStream.read(buffer)
+            while (currentCoroutineContext().isActive) {
+                yield()
+
+                val bytesRead = runInterruptible {
+                    inputStream.read(buffer)
+                }
+
                 if (bytesRead == -1) break
                 emit(String(buffer, 0, bytesRead))
             }

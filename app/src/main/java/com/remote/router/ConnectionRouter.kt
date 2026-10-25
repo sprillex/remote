@@ -85,12 +85,15 @@ class ConnectionRouter(
                 }
             }
             com.remote.db.ConnectionType.DIRECT_BT_HID -> {
+                // Not supported
                 Result.success(Unit)
             }
             com.remote.db.ConnectionType.ESP32_BLE_BRIDGE -> {
+                // Not supported
                 Result.success(Unit)
             }
             com.remote.db.ConnectionType.FLIPPER_ZERO_BRIDGE -> {
+                flipperBridge?.close()
                 Result.success(Unit)
             }
             com.remote.db.ConnectionType.ROKU_ECP_WIFI -> {
@@ -124,7 +127,16 @@ class ConnectionRouter(
                 Result.success(Unit)
             }
             com.remote.db.ConnectionType.FLIPPER_ZERO_BRIDGE -> {
-                Result.success(Unit)
+                try {
+                    val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+                    val btDevice = device.macAddress?.let { adapter?.getRemoteDevice(it) }
+                    if (btDevice != null) {
+                        flipperBridge?.connect(btDevice)
+                    }
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
             }
             else -> Result.failure(IllegalArgumentException("Unsupported device type: ${device.connectionType}"))
         }

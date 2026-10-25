@@ -1,14 +1,16 @@
 package com.remote.bluetooth
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHidDevice
 import android.bluetooth.BluetoothHidDeviceAppSdpSettings
 import android.bluetooth.BluetoothHidDeviceAppQosSettings
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import java.util.concurrent.Executors
 
 class HidDeviceManager(private val context: Context) {
@@ -66,6 +68,13 @@ class HidDeviceManager(private val context: Context) {
         }
     }
 
+    private fun hasPermission(): Boolean {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            return ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+        }
+        return true
+    }
+
     private var hidDevice: BluetoothHidDevice? = null
 
     val sdpSettings by lazy {
@@ -98,9 +107,13 @@ class HidDeviceManager(private val context: Context) {
 
     private val executor = Executors.newSingleThreadExecutor()
 
-    @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.P)
     fun registerApp(proxy: BluetoothHidDevice) {
+        if (!hasPermission()) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to register app")
+            return
+        }
+
         this.hidDevice = proxy
         val outQos = BluetoothHidDeviceAppQosSettings(
             BluetoothHidDeviceAppQosSettings.SERVICE_BEST_EFFORT,
@@ -119,18 +132,38 @@ class HidDeviceManager(private val context: Context) {
             -1
         )
 
-        proxy.registerApp(sdpSettings, inQos, outQos, executor, callback)
+        try {
+            proxy.registerApp(sdpSettings, inQos, outQos, executor, callback)
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException on registerApp", e)
+        }
     }
 
-    @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.P)
     fun unregisterApp() {
-        hidDevice?.unregisterApp()
+        if (hasPermission()) {
+            try {
+                hidDevice?.unregisterApp()
+            } catch (e: SecurityException) {
+                Log.e(TAG, "SecurityException on unregisterApp", e)
+            }
+        } else {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
+        }
     }
 
-    @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.P)
     fun sendReport(device: BluetoothDevice, id: Int, report: ByteArray): Boolean {
-        return hidDevice?.sendReport(device, id, report) ?: false
+        if (hasPermission()) {
+            try {
+                return hidDevice?.sendReport(device, id, report) ?: false
+            } catch (e: SecurityException) {
+                Log.e(TAG, "SecurityException on sendReport", e)
+                return false
+            }
+        } else {
+             Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
+             return false
+        }
     }
 }
