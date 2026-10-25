@@ -178,7 +178,7 @@ data class ButtonMappingEntity(
 │   ├── [x] Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback.
 │   ├── [x] Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation.
 │   ├── [x] Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming.
-│   └── [ ] Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
+│   └── [x] Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
 │
 └── Phase 5: Infrared Subsystem Extensions (Low Priority) [Audit Complete - Unstarted]
     ├── [ ] Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library.
