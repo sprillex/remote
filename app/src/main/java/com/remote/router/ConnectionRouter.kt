@@ -16,8 +16,7 @@ class ConnectionRouter(
     private val hidManager: HidDeviceManager? = null,
     private val bleManager: BleGattManager? = null,
     private val rokuClient: RokuClient? = null,
-    private val flipperBridge: FlipperBridge? = null,
-    private val sshClientFactory: ((String, String) -> SshClientWrapper)? = null
+    private val flipperBridge: FlipperBridge? = null
 ) {
     private val _activeDevice = MutableStateFlow<TargetDeviceEntity?>(null)
     val activeDevice: StateFlow<TargetDeviceEntity?> = _activeDevice.asStateFlow()
@@ -70,6 +69,11 @@ class ConnectionRouter(
         }
     }
 
+    // visible for testing - allows injection of an SSH client since we lack a global factory
+    fun injectSshClient(sshClient: SshClientWrapper) {
+        this.activeSshClient = sshClient
+    }
+
     private suspend fun disconnectInternal(device: TargetDeviceEntity): Result<Unit> {
         return when (device.connectionType) {
             com.remote.db.ConnectionType.SSH_NETWORK -> {
@@ -97,19 +101,13 @@ class ConnectionRouter(
     }
 
     private suspend fun connectInternal(device: TargetDeviceEntity): Result<Unit> {
-        // Fallback to success in tests without protocol managers configured, simulating successful hardware setup.
-        // A real implementation would ensure managers exist or handle failures if strict checking is on.
         return when (device.connectionType) {
             com.remote.db.ConnectionType.SSH_NETWORK -> {
-                device.hostAddress?.let { host ->
-                    val ssh = sshClientFactory?.invoke(host, device.authUsername ?: "root")
-                    try {
-                        activeSshClient = ssh
-                        Result.success(Unit)
-                    } catch (e: Exception) {
-                        Result.failure(e)
-                    }
-                } ?: Result.failure(IllegalArgumentException("Missing hostAddress"))
+                if (activeSshClient != null) {
+                    Result.success(Unit)
+                } else {
+                    Result.failure(IllegalStateException("No SSH client configured"))
+                }
             }
             com.remote.db.ConnectionType.ROKU_ECP_WIFI -> {
                 if (rokuClient != null) {
