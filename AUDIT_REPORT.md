@@ -10,7 +10,8 @@ The repository presents a solid foundation for a multi-target remote control app
   - Fix rationale: Implemented secure random PIN generation using esp_random() to avoid MITM vulnerabilities.
 - [x] `[P0-02][HARD]` `Binder Thread Deadlock Risk`: `app/src/main/java/com/remote/bluetooth/HidDeviceManager.kt:116` - Executing Bluetooth HID callbacks synchronously on the binder thread (`{ it.run() }`) blocks IPC and can cause ANRs. Remediation: Provide a dedicated background `Executor` or Main thread handler.
   - Fix rationale: Provided a dedicated SingleThreadExecutor to handle HID callbacks, avoiding binder thread deadlocks and ANRs.
-- [ ] `[P0-03][HARD]` `Missing Bluetooth Permissions Validation`: `app/src/main/java/com/remote/bluetooth/BleGattManager.kt:15` - `@SuppressLint("MissingPermission")` suppresses critical runtime permission checks (e.g., BLUETOOTH_CONNECT), which will cause `SecurityException` crashes on Android 12+ (API 31+) if permissions are denied. Remediation: Implement runtime permission request flow and validate before invoking GATT operations.
+- [x] `[P0-03][HARD]` `Missing Bluetooth Permissions Validation`: `app/src/main/java/com/remote/bluetooth/BleGattManager.kt:15` - `@SuppressLint("MissingPermission")` suppresses critical runtime permission checks (e.g., BLUETOOTH_CONNECT), which will cause `SecurityException` crashes on Android 12+ (API 31+) if permissions are denied. Remediation: Implement runtime permission request flow and validate before invoking GATT operations.
+  - Fix rationale: Implemented explicit runtime permission checks before invoking GATT operations to avoid SecurityException on Android 12+.
 
 ## P1: Concurrency, Error Handling & Logic Bugs
 
