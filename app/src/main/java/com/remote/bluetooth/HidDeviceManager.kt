@@ -248,6 +248,28 @@ class HidDeviceManager(
         return false
     }
 
+    fun sendMediaKey(mediaUsageId: Int): Boolean {
+        val (usageId, modifier) = when (mediaUsageId) {
+            MediaKey.VOLUME_UP -> Pair(0x80.toByte(), 0.toByte())
+            MediaKey.VOLUME_DOWN -> Pair(0x81.toByte(), 0.toByte())
+            MediaKey.MUTE -> Pair(0x7F.toByte(), 0.toByte())
+            MediaKey.PLAY_PAUSE -> Pair(0x2C.toByte(), 0.toByte())
+            MediaKey.NEXT_TRACK -> Pair(0x4F.toByte(), 0.toByte())
+            MediaKey.PREV_TRACK -> Pair(0x50.toByte(), 0.toByte())
+            MediaKey.STOP -> Pair(0x29.toByte(), 0.toByte())
+            MediaKey.FAST_FORWARD -> Pair(0x4F.toByte(), 0.toByte())
+            MediaKey.REWIND -> Pair(0x50.toByte(), 0.toByte())
+            MediaKey.HOME -> Pair(0x4A.toByte(), 0.toByte())
+            MediaKey.BACK -> Pair(0x29.toByte(), 0.toByte())
+            MediaKey.RECENTS -> Pair(0x2B.toByte(), 0x04.toByte()) // Alt+Tab
+            MediaKey.NOTIFICATIONS -> Pair(0x43.toByte(), 0.toByte()) // F10
+            MediaKey.POWER -> Pair(0x66.toByte(), 0.toByte())
+            MediaKey.SEARCH -> Pair(0x06.toByte(), 0x08.toByte()) // GUI+c
+            else -> Pair((mediaUsageId and 0xFF).toByte(), 0.toByte())
+        }
+        return sendKey(usageId, modifier)
+    }
+
     fun sendChar(char: Char): Boolean {
         val report = KeyTranslator.translate(char) ?: return false
         return sendKey(report.usageId, report.modifier)

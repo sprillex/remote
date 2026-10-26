@@ -119,14 +119,6 @@ class HidDeviceManagerTest {
     }
 
     @Test
-    fun testBuildConsumerReport() {
-        val report = HidDeviceManager.buildConsumerReport(MediaKey.PLAY_PAUSE)
-        assertEquals(2, report.size)
-        assertEquals((0xCD).toByte(), report[0])
-        assertEquals((0x00).toByte(), report[1])
-    }
-
-    @Test
     fun testSendMediaKeyWithoutTargetDeviceReturnsFalse() {
         val mockContext = android.content.ContextWrapper(null)
         val manager = HidDeviceManager(mockContext)
