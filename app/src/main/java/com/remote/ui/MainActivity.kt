@@ -44,6 +44,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkAndRequestPermissions()
+        try {
+            com.remote.bluetooth.HidDeviceManager(this).registerHidApp()
+        } catch (_: Exception) {}
 
         setContent {
             MaterialTheme {

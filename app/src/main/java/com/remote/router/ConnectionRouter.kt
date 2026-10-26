@@ -153,6 +153,7 @@ class ConnectionRouter(
             }
             com.remote.db.ConnectionType.DIRECT_BT_HID -> {
                 try {
+                    hidManager?.registerHidApp()
                     if (!device.macAddress.isNullOrBlank()) {
                         @Suppress("DEPRECATION")
                         val adapter = try { android.bluetooth.BluetoothAdapter.getDefaultAdapter() } catch (_: Throwable) { null }

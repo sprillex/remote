@@ -183,6 +183,43 @@ class HidDeviceManager(
         } else null
     }
 
+    fun registerHidApp() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (!hasPermission()) {
+                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to get HID profile proxy")
+                return
+            }
+            if (this.hidDevice != null) {
+                registerApp(this.hidDevice!!)
+                return
+            }
+            try {
+                @Suppress("DEPRECATION")
+                val adapter = try { android.bluetooth.BluetoothAdapter.getDefaultAdapter() } catch (_: Throwable) { null }
+                adapter?.getProfileProxy(context, object : android.bluetooth.BluetoothProfile.ServiceListener {
+                    override fun onServiceConnected(profile: Int, proxy: android.bluetooth.BluetoothProfile) {
+                        if (profile == android.bluetooth.BluetoothProfile.HID_DEVICE) {
+                            Log.d(TAG, "BluetoothProfile.HID_DEVICE connected")
+                            val hidDeviceProxy = proxy as BluetoothHidDevice
+                            registerApp(hidDeviceProxy)
+                        }
+                    }
+
+                    override fun onServiceDisconnected(profile: Int) {
+                        if (profile == android.bluetooth.BluetoothProfile.HID_DEVICE) {
+                            Log.d(TAG, "BluetoothProfile.HID_DEVICE disconnected")
+                            hidDevice = null
+                        }
+                    }
+                }, android.bluetooth.BluetoothProfile.HID_DEVICE)
+            } catch (e: SecurityException) {
+                Log.e(TAG, "SecurityException on getProfileProxy", e)
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception on getProfileProxy", e)
+            } catch (_: Throwable) {}
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.P)
     fun registerApp(proxy: BluetoothHidDevice) {
         if (!hasPermission()) {

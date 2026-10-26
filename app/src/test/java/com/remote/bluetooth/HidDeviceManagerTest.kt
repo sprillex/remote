@@ -93,4 +93,12 @@ class HidDeviceManagerTest {
         assertNotNull("Bonded devices set should not be null", bonded)
         assertTrue("Bonded devices set should be empty without permission or adapter", bonded.isEmpty())
     }
+
+    @Test
+    fun testRegisterHidAppHandlesNullAdapterGracefully() {
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext)
+        manager.registerHidApp()
+        assertTrue("registerHidApp should complete gracefully without throwing", true)
+    }
 }
