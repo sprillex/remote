@@ -26,7 +26,8 @@ enum class ProfileType {
     MEDIA_CONTROLLER,
     PRESENTATION_CLICKER,
     TERMINAL_MACRO,
-    SSH_SESSION
+    SSH_SESSION,
+    ANDROID_DEVICE
 }
 
 class Converters {

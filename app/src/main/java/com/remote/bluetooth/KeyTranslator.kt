@@ -4,6 +4,26 @@ package com.remote.bluetooth
  * Translates UTF-8 characters to standard USB HID Usage Tables (Page 0x07) bytes.
  * Also determines if a shift modifier is required for the character.
  */
+object MediaKey {
+    const val PLAY_PAUSE = 0x00CD
+    const val PLAY = 0x00B0
+    const val PAUSE = 0x00B1
+    const val NEXT_TRACK = 0x00B5
+    const val PREV_TRACK = 0x00B6
+    const val STOP = 0x00B7
+    const val FAST_FORWARD = 0x00B3
+    const val REWIND = 0x00B4
+    const val VOLUME_UP = 0x00E9
+    const val VOLUME_DOWN = 0x00EA
+    const val MUTE = 0x00E2
+    const val HOME = 0x0223
+    const val BACK = 0x0224
+    const val RECENTS = 0x0225
+    const val SEARCH = 0x0221
+    const val NOTIFICATIONS = 0x0227
+    const val POWER = 0x0030
+}
+
 object KeyTranslator {
 
     data class HidReport(val usageId: Byte, val modifier: Byte)

@@ -83,6 +83,7 @@ class MainActivity : ComponentActivity() {
 enum class NavTab {
     DEVICES,
     REMOTE,
+    BADUSB,
     GUIDES
 }
 
@@ -105,6 +106,12 @@ fun MainAppContent() {
                 name = "Living Room TV",
                 connectionType = ConnectionType.ROKU_ECP_WIFI,
                 profileType = ProfileType.TV_REMOTE
+            ),
+            TargetDeviceEntity(
+                id = 3L,
+                name = "Android Tablet",
+                connectionType = ConnectionType.DIRECT_BT_HID,
+                profileType = ProfileType.ANDROID_DEVICE
             )
         )
     }
@@ -134,6 +141,12 @@ fun MainAppContent() {
                     onClick = { selectedTab = NavTab.REMOTE },
                     icon = { Text("🎮") },
                     label = { Text("Remote") }
+                )
+                NavigationBarItem(
+                    selected = selectedTab == NavTab.BADUSB,
+                    onClick = { selectedTab = NavTab.BADUSB },
+                    icon = { Text("⚡") },
+                    label = { Text("BadUSB") }
                 )
                 NavigationBarItem(
                     selected = selectedTab == NavTab.GUIDES,
@@ -186,6 +199,9 @@ fun MainAppContent() {
                             onSendKey = { usageId, modifier ->
                                 hidDeviceManager.sendKey(usageId, modifier)
                             },
+                            onSendMediaKey = { mediaUsageId ->
+                                hidDeviceManager.sendMediaKey(mediaUsageId)
+                            },
                             onSendChar = { char ->
                                 hidDeviceManager.sendChar(char)
                             },
@@ -196,6 +212,16 @@ fun MainAppContent() {
                             }
                         )
                     }
+                }
+                NavTab.BADUSB -> {
+                    BadUsbScriptSurface(
+                        onSendKey = { usageId, modifier ->
+                            hidDeviceManager.sendKey(usageId, modifier)
+                        },
+                        onSendChar = { char ->
+                            hidDeviceManager.sendChar(char)
+                        }
+                    )
                 }
                 NavTab.GUIDES -> {
                     DeviceSetupGuideView(
