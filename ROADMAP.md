@@ -47,6 +47,7 @@ Comprehensive architecture and phased engineering roadmap for a multi-profile re
 ## 2. Technical Stack & Hardware Requirements
 
 ### Mobile Application
+
 - **Platform:** Android 14+ (Target SDK 34/35), optimized for Pixel 8a.
 - **UI Toolkit:** Jetpack Compose with dynamic Material 3 design and dark theme.
 - **Database:** SQLite via Android Room with reactive Kotlin Coroutines/Flow.
@@ -58,6 +59,7 @@ Comprehensive architecture and phased engineering roadmap for a multi-profile re
   - **Audio Modulation:** Android `AudioTrack` (PCM 16-bit 48kHz stereo) for passive 3.5mm emitters.
 
 ### Microcontroller Dongle
+
 - **SoC:** ESP32-S2 or ESP32-S3 (Classic ESP32-WROOM/WROVER lack native USB OTG and cannot be used).
 - **Firmware Framework:** ESP-IDF or PlatformIO / Arduino Core with `Adafruit_TinyUSB` and `IRremoteESP8266`.
 - **Hardware Interfacing:**
@@ -140,14 +142,14 @@ data class ButtonMappingEntity(
 
 ## 4. Contextual Onboarding & Setup Instructions Engine
 
-| Target Type | In-App Setup Step | Critical Warnings & Specific Verification Checks |
-| --- | --- | --- |
-| **Direct BT HID** | 1. Prompt system discoverability via `ACTION_REQUEST_DISCOVERABLE`.<br>2. Direct user to target device Bluetooth settings. | Target OS must complete pairing handshake. No host software required. |
-| **ESP32 Dongle** | 1. Insert dongle into native USB port.<br>2. Pair phone to dongle BLE advertising name. | Ensure board uses ESP32-S2/S3 native pins (GPIO 19/20), not UART bridge. |
-| **Roku TV (ECP)** | 1. Verify phone and TV share same Wi-Fi subnet.<br>2. Enable network control in Roku settings. | **Roku OS 14.1+ Requirement:** Navigate to `Settings → System → Advanced system settings → Control by mobile apps → Network access` and set to **"Enabled"**. |
-| **SSH Host** | 1. Prompt user for target IP and port.<br>2. In-app Ed25519 key generation. | Provide 1-tap "Copy Public Key" button for appending to target `~/.ssh/authorized_keys`. |
-| **3.5mm IR Jack** | 1. Plug passive audio IR blaster into 3.5mm adapter.<br>2. Set media volume to 100%. | **Volume Warning:** Disable system equalizers, Dolby Atmos, and hearing-safety limiters to prevent wave clipping. |
-| **Flipper Zero** | 1. Enable Bluetooth on Flipper (`Settings → Bluetooth`).<br>2. Pair via app BLE scanner. | Ensure Flipper is on home screen (CLI session blocked if stuck in sub-menus). |
+| Target Type       | In-App Setup Step                                                                                                          | Critical Warnings & Specific Verification Checks                                                                                                              |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Direct BT HID** | 1. Prompt system discoverability via `ACTION_REQUEST_DISCOVERABLE`.<br>2. Direct user to target device Bluetooth settings. | Target OS must complete pairing handshake. No host software required.                                                                                         |
+| **ESP32 Dongle**  | 1. Insert dongle into native USB port.<br>2. Pair phone to dongle BLE advertising name.                                    | Ensure board uses ESP32-S2/S3 native pins (GPIO 19/20), not UART bridge.                                                                                      |
+| **Roku TV (ECP)** | 1. Verify phone and TV share same Wi-Fi subnet.<br>2. Enable network control in Roku settings.                             | **Roku OS 14.1+ Requirement:** Navigate to `Settings → System → Advanced system settings → Control by mobile apps → Network access` and set to **"Enabled"**. |
+| **SSH Host**      | 1. Prompt user for target IP and port.<br>2. In-app Ed25519 key generation.                                                | Provide 1-tap "Copy Public Key" button for appending to target `~/.ssh/authorized_keys`.                                                                      |
+| **3.5mm IR Jack** | 1. Plug passive audio IR blaster into 3.5mm adapter.<br>2. Set media volume to 100%.                                       | **Volume Warning:** Disable system equalizers, Dolby Atmos, and hearing-safety limiters to prevent wave clipping.                                             |
+| **Flipper Zero**  | 1. Enable Bluetooth on Flipper (`Settings → Bluetooth`).<br>2. Pair via app BLE scanner.                                   | Ensure Flipper is on home screen (CLI session blocked if stuck in sub-menus).                                                                                 |
 
 ## 5. Phased Engineering Roadmap
 
@@ -178,7 +180,7 @@ data class ButtonMappingEntity(
 │   ├── [x] Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback.
 │   ├── [x] Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation.
 │   ├── [x] Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming.
-│   └── [ ] Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
+│   └── [x] Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
 │
 └── Phase 5: Infrared Subsystem Extensions (Low Priority) [Audit Complete - Unstarted]
     ├── [ ] Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library.
@@ -192,30 +194,40 @@ data class ButtonMappingEntity(
 ## 6. Verification & Validation Checklists
 
 ### Milestone 1: Direct Bluetooth HID (Pixel 8a)
+
 **Status:** [Audit Complete - Unstarted]
+
 - [ ] Phone registers `BluetoothHidDevice` without crashing.
 - [ ] Target host (PC/Mac/Linux) discovers phone as standard Bluetooth Keyboard.
 - [ ] Precompose text injection sends 500 characters of mixed ASCII without dropped letters or stuck modifiers.
 
 ### Milestone 2: ESP32 Dongle Bridge
+
 **Status:** [Audit Complete - Unstarted]
+
 - [ ] ESP32-S2/S3 enumerates in target host BIOS/UEFI as standard USB HID Keyboard.
 - [ ] Android app connects to ESP32 over BLE within 1.5 seconds of profile selection.
 - [ ] Keystrokes sent over BLE pass through FIFO buffer to host with under 20ms perceived latency.
 
 ### Milestone 3: Profile State Machine
+
 **Status:** [Audit Complete - In Progress]
+
 - [x] Switching from Profile A (Direct BT) to Profile B (ESP32) cleanly severs Link A before initializing Link B.
 - [ ] No residual Bluetooth locks or background connection conflicts occur when switching profiles rapidly.
 
 ### Milestone 4: Roku Network Remote
+
 **Status:** [Audit Complete - Unstarted]
+
 - [ ] App prompts user with Roku OS 14.1+ "Control by mobile apps" setup modal during device registration.
 - [ ] App fires `POST http://<ROKU_IP>:8060/keypress/Home` and navigates TV interface instantly.
 - [ ] App successfully types text using sequential `Lit_<char>` requests with proper URL encoding.
 
 ### Milestone 5: SSH & IR Modules
+
 **Status:** [Audit Complete - Unstarted]
+
 - [ ] App generates Ed25519 keypair and successfully authenticates against target SSH server.
 - [ ] ESP32 RMT peripheral outputs calibrated 38kHz square wave driving IR LED to control target TV.
 - [ ] AudioTrack module produces 19kHz stereo audio file without DAC distortion when volume is set to 100%.
