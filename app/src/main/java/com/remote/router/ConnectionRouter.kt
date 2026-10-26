@@ -4,6 +4,7 @@ import com.remote.db.TargetDeviceEntity
 import com.remote.bluetooth.BleGattManager
 import com.remote.bluetooth.FlipperBridge
 import com.remote.bluetooth.HidDeviceManager
+import com.remote.ir.AudioIrDriver
 import com.remote.network.RokuClient
 import com.remote.network.SshClientWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,8 @@ class ConnectionRouter(
     private val hidManager: HidDeviceManager? = null,
     private val bleManager: BleGattManager? = null,
     private val rokuClient: RokuClient? = null,
-    private val flipperBridge: FlipperBridge? = null
+    private val flipperBridge: FlipperBridge? = null,
+    private val audioIrDriver: AudioIrDriver? = null
 ) {
     private val _activeDevice = MutableStateFlow<TargetDeviceEntity?>(null)
     val activeDevice: StateFlow<TargetDeviceEntity?> = _activeDevice.asStateFlow()
@@ -96,10 +98,14 @@ class ConnectionRouter(
                 flipperBridge?.close()
                 Result.success(Unit)
             }
-            com.remote.db.ConnectionType.ROKU_ECP_WIFI -> {
+            com.remote.db.ConnectionType.ROKU_ECP_WIFI,
+            com.remote.db.ConnectionType.AUDIO_JACK_IR,
+            com.remote.db.ConnectionType.INTERNAL_IR,
+            com.remote.db.ConnectionType.USB_IR_DONGLE,
+            com.remote.db.ConnectionType.ESP32_IR_EMITTER,
+            com.remote.db.ConnectionType.ESP32_HYBRID -> {
                 Result.success(Unit)
             }
-            else -> Result.failure(IllegalArgumentException("Unsupported device type: ${device.connectionType}"))
         }
     }
 
@@ -120,7 +126,12 @@ class ConnectionRouter(
                 }
                 Result.success(Unit)
             }
-            com.remote.db.ConnectionType.DIRECT_BT_HID -> {
+            com.remote.db.ConnectionType.DIRECT_BT_HID,
+            com.remote.db.ConnectionType.AUDIO_JACK_IR,
+            com.remote.db.ConnectionType.INTERNAL_IR,
+            com.remote.db.ConnectionType.USB_IR_DONGLE,
+            com.remote.db.ConnectionType.ESP32_IR_EMITTER,
+            com.remote.db.ConnectionType.ESP32_HYBRID -> {
                 Result.success(Unit)
             }
             com.remote.db.ConnectionType.ESP32_BLE_BRIDGE -> {
@@ -138,7 +149,6 @@ class ConnectionRouter(
                     Result.failure(e)
                 }
             }
-            else -> Result.failure(IllegalArgumentException("Unsupported device type: ${device.connectionType}"))
         }
     }
 }
