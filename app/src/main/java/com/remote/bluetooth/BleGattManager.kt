@@ -171,12 +171,36 @@ class BleGattManager(private val context: Context? = null) {
         }
     }
 
+    fun pairDevice(device: BluetoothDevice): Boolean {
+        if (!hasPermission()) {
+            logE("Missing BLUETOOTH_CONNECT permission on pairDevice")
+            return false
+        }
+        return try {
+            if (device.bondState == BluetoothDevice.BOND_NONE) {
+                device.createBond()
+            } else {
+                true
+            }
+        } catch (e: SecurityException) {
+            logE("SecurityException on pairDevice", e)
+            false
+        } catch (e: Exception) {
+            logE("Exception on pairDevice", e)
+            false
+        }
+    }
+
     fun connect(device: BluetoothDevice): Boolean {
         if (!hasPermission()) {
             logE("Missing BLUETOOTH_CONNECT permission on connect")
             return false
         }
         return try {
+            if (device.bondState == BluetoothDevice.BOND_NONE) {
+                logD("Device not bonded, initiating pairing")
+                pairDevice(device)
+            }
             bluetoothGatt = device.connectGatt(context, false, gattCallback)
             bluetoothGatt != null
         } catch (e: SecurityException) {

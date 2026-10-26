@@ -84,4 +84,13 @@ class HidDeviceManagerTest {
         testExecutor.execute { }
         assertTrue("Custom executor should execute tasks", executedOnCustom.get())
     }
+
+    @Test
+    fun testGetBondedDevicesWithoutPermissionReturnsEmptySet() {
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext)
+        val bonded = manager.getBondedDevices()
+        assertNotNull("Bonded devices set should not be null", bonded)
+        assertTrue("Bonded devices set should be empty without permission or adapter", bonded.isEmpty())
+    }
 }

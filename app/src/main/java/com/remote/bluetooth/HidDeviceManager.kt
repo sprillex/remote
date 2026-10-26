@@ -72,11 +72,85 @@ class HidDeviceManager(
         }
     }
 
-    private fun hasPermission(): Boolean {
+    fun hasPermission(): Boolean {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             return ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
         }
         return true
+    }
+
+    fun pairDevice(device: BluetoothDevice): Boolean {
+        if (!hasPermission()) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to pair device")
+            return false
+        }
+        return try {
+            if (device.bondState == BluetoothDevice.BOND_NONE) {
+                device.createBond()
+            } else {
+                true
+            }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException on pairDevice", e)
+            false
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception on pairDevice", e)
+            false
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun connect(device: BluetoothDevice): Boolean {
+        if (!hasPermission()) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to connect HID device")
+            return false
+        }
+        return try {
+            hidDevice?.connect(device) ?: false
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException on connect", e)
+            false
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception on connect", e)
+            false
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun disconnect(device: BluetoothDevice): Boolean {
+        if (!hasPermission()) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to disconnect HID device")
+            return false
+        }
+        return try {
+            hidDevice?.disconnect(device) ?: false
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException on disconnect", e)
+            false
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception on disconnect", e)
+            false
+        }
+    }
+
+    fun getBondedDevices(): Set<BluetoothDevice> {
+        if (!hasPermission()) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to get bonded devices")
+            return emptySet()
+        }
+        return try {
+            @Suppress("DEPRECATION")
+            val adapter = try { android.bluetooth.BluetoothAdapter.getDefaultAdapter() } catch (_: Throwable) { null }
+            adapter?.bondedDevices ?: emptySet()
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException on getBondedDevices", e)
+            emptySet()
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception on getBondedDevices", e)
+            emptySet()
+        } catch (_: Throwable) {
+            emptySet()
+        }
     }
 
     private var hidDevice: BluetoothHidDevice? = null
