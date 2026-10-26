@@ -84,4 +84,37 @@ class HidDeviceManagerTest {
         testExecutor.execute { }
         assertTrue("Custom executor should execute tasks", executedOnCustom.get())
     }
+
+    @Test
+    fun testGetBondedDevicesWithoutPermissionReturnsEmptySet() {
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext)
+        val bonded = manager.getBondedDevices()
+        assertNotNull("Bonded devices set should not be null", bonded)
+        assertTrue("Bonded devices set should be empty without permission or adapter", bonded.isEmpty())
+    }
+
+    @Test
+    fun testRegisterHidAppHandlesNullAdapterGracefully() {
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext)
+        manager.registerHidApp()
+        assertTrue("registerHidApp should complete gracefully without throwing", true)
+    }
+
+    @Test
+    fun testSendKeyWithoutTargetDeviceReturnsFalse() {
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext)
+        val result = manager.sendKey(0x04, 0x00)
+        org.junit.Assert.assertFalse("sendKey without target device should return false", result)
+    }
+
+    @Test
+    fun testSendCharWithoutTargetDeviceReturnsFalse() {
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext)
+        val result = manager.sendChar('a')
+        org.junit.Assert.assertFalse("sendChar without target device should return false", result)
+    }
 }

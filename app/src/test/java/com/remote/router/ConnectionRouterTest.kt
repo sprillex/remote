@@ -69,6 +69,22 @@ class ConnectionRouterTest {
         assertNull(router.activeDevice.value)
     }
 
+    @Test
+    fun `routeTo Bluetooth types succeeds without error`() = runBlocking {
+        val btHid = createDevice(1, ConnectionType.DIRECT_BT_HID)
+        val esp32Ble = createDevice(2, ConnectionType.ESP32_BLE_BRIDGE)
+        val flipperBle = createDevice(3, ConnectionType.FLIPPER_ZERO_BRIDGE)
+
+        router.routeTo(btHid)
+        assertEquals(btHid, router.activeDevice.value)
+
+        router.routeTo(esp32Ble)
+        assertEquals(esp32Ble, router.activeDevice.value)
+
+        router.routeTo(flipperBle)
+        assertEquals(flipperBle, router.activeDevice.value)
+    }
+
     private fun createDevice(id: Long, type: ConnectionType): TargetDeviceEntity {
         return TargetDeviceEntity(
             id = id,

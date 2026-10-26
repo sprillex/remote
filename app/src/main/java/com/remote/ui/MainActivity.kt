@@ -28,7 +28,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.remote.bluetooth.HidDeviceManager
 import com.remote.db.ConnectionType
 import com.remote.db.ProfileType
 import com.remote.db.TargetDeviceEntity
@@ -44,6 +46,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkAndRequestPermissions()
+        try {
+            com.remote.bluetooth.HidDeviceManager(this).registerHidApp()
+        } catch (_: Exception) {}
 
         setContent {
             MaterialTheme {
@@ -84,6 +89,8 @@ enum class NavTab {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainAppContent() {
+    val context = LocalContext.current
+    val hidDeviceManager = remember(context) { HidDeviceManager(context).apply { registerHidApp() } }
     var selectedTab by remember { mutableStateOf(NavTab.DEVICES) }
     val devices = remember {
         mutableStateListOf(
@@ -174,7 +181,20 @@ fun MainAppContent() {
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        DeviceSurface(profileType = activeDevice?.profileType ?: ProfileType.PC_KEYBOARD)
+                        DeviceSurface(
+                            profileType = activeDevice?.profileType ?: ProfileType.PC_KEYBOARD,
+                            onSendKey = { usageId, modifier ->
+                                hidDeviceManager.sendKey(usageId, modifier)
+                            },
+                            onSendChar = { char ->
+                                hidDeviceManager.sendChar(char)
+                            },
+                            onSendText = { text ->
+                                for (ch in text) {
+                                    hidDeviceManager.sendChar(ch)
+                                }
+                            }
+                        )
                     }
                 }
                 NavTab.GUIDES -> {

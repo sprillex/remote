@@ -72,14 +72,89 @@ class HidDeviceManager(
         }
     }
 
-    private fun hasPermission(): Boolean {
+    fun hasPermission(): Boolean {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             return ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
         }
         return true
     }
 
+    fun pairDevice(device: BluetoothDevice): Boolean {
+        if (!hasPermission()) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to pair device")
+            return false
+        }
+        return try {
+            if (device.bondState == BluetoothDevice.BOND_NONE) {
+                device.createBond()
+            } else {
+                true
+            }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException on pairDevice", e)
+            false
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception on pairDevice", e)
+            false
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun connect(device: BluetoothDevice): Boolean {
+        if (!hasPermission()) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to connect HID device")
+            return false
+        }
+        return try {
+            hidDevice?.connect(device) ?: false
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException on connect", e)
+            false
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception on connect", e)
+            false
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun disconnect(device: BluetoothDevice): Boolean {
+        if (!hasPermission()) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to disconnect HID device")
+            return false
+        }
+        return try {
+            hidDevice?.disconnect(device) ?: false
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException on disconnect", e)
+            false
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception on disconnect", e)
+            false
+        }
+    }
+
+    fun getBondedDevices(): Set<BluetoothDevice> {
+        if (!hasPermission()) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to get bonded devices")
+            return emptySet()
+        }
+        return try {
+            @Suppress("DEPRECATION")
+            val adapter = try { android.bluetooth.BluetoothAdapter.getDefaultAdapter() } catch (_: Throwable) { null }
+            adapter?.bondedDevices ?: emptySet()
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException on getBondedDevices", e)
+            emptySet()
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception on getBondedDevices", e)
+            emptySet()
+        } catch (_: Throwable) {
+            emptySet()
+        }
+    }
+
     private var hidDevice: BluetoothHidDevice? = null
+    private var connectedDevice: BluetoothDevice? = null
 
     val sdpSettings by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -104,9 +179,80 @@ class HidDeviceManager(
                 override fun onConnectionStateChanged(device: BluetoothDevice, state: Int) {
                     super.onConnectionStateChanged(device, state)
                     Log.d(TAG, "onConnectionStateChanged: device=${device.address}, state=$state")
+                    if (state == android.bluetooth.BluetoothProfile.STATE_CONNECTED) {
+                        connectedDevice = device
+                    } else if (state == android.bluetooth.BluetoothProfile.STATE_DISCONNECTED) {
+                        if (connectedDevice?.address == device.address) {
+                            connectedDevice = null
+                        }
+                    }
                 }
             }
         } else null
+    }
+
+    fun getTargetDevice(): BluetoothDevice? {
+        if (connectedDevice != null) return connectedDevice
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && hasPermission()) {
+            try {
+                return hidDevice?.getDevicesMatchingConnectionStates(intArrayOf(android.bluetooth.BluetoothProfile.STATE_CONNECTED))?.firstOrNull()
+            } catch (_: Exception) {} catch (_: Throwable) {}
+        }
+        return null
+    }
+
+    fun sendKey(usageId: Byte, modifier: Byte = 0): Boolean {
+        val device = getTargetDevice() ?: return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val keyDown = buildKeyboardReport(modifier, listOf(usageId))
+            val sentDown = sendReport(device, 0, keyDown)
+            val keyUp = buildKeyboardReport(0, emptyList())
+            val sentUp = sendReport(device, 0, keyUp)
+            return sentDown && sentUp
+        }
+        return false
+    }
+
+    fun sendChar(char: Char): Boolean {
+        val report = KeyTranslator.translate(char) ?: return false
+        return sendKey(report.usageId, report.modifier)
+    }
+
+    fun registerHidApp() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (!hasPermission()) {
+                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to get HID profile proxy")
+                return
+            }
+            if (this.hidDevice != null) {
+                registerApp(this.hidDevice!!)
+                return
+            }
+            try {
+                @Suppress("DEPRECATION")
+                val adapter = try { android.bluetooth.BluetoothAdapter.getDefaultAdapter() } catch (_: Throwable) { null }
+                adapter?.getProfileProxy(context, object : android.bluetooth.BluetoothProfile.ServiceListener {
+                    override fun onServiceConnected(profile: Int, proxy: android.bluetooth.BluetoothProfile) {
+                        if (profile == android.bluetooth.BluetoothProfile.HID_DEVICE) {
+                            Log.d(TAG, "BluetoothProfile.HID_DEVICE connected")
+                            val hidDeviceProxy = proxy as BluetoothHidDevice
+                            registerApp(hidDeviceProxy)
+                        }
+                    }
+
+                    override fun onServiceDisconnected(profile: Int) {
+                        if (profile == android.bluetooth.BluetoothProfile.HID_DEVICE) {
+                            Log.d(TAG, "BluetoothProfile.HID_DEVICE disconnected")
+                            hidDevice = null
+                        }
+                    }
+                }, android.bluetooth.BluetoothProfile.HID_DEVICE)
+            } catch (e: SecurityException) {
+                Log.e(TAG, "SecurityException on getProfileProxy", e)
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception on getProfileProxy", e)
+            } catch (_: Throwable) {}
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
