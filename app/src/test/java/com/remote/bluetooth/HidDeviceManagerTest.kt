@@ -13,8 +13,8 @@ class HidDeviceManagerTest {
     @Test
     fun testKeyboardDescriptorSize() {
         assertNotNull("KEYBOARD_DESCRIPTOR must not be null", HidDeviceManager.KEYBOARD_DESCRIPTOR)
-        // Check descriptor has expected bytes (just verifying it's not empty and contains HID info)
-        assertEquals("KEYBOARD_DESCRIPTOR length is incorrect", 90, HidDeviceManager.KEYBOARD_DESCRIPTOR.size)
+        // Check descriptor has expected bytes (just verifying it's standard 63-byte Boot Keyboard descriptor)
+        assertEquals("KEYBOARD_DESCRIPTOR length is incorrect", 63, HidDeviceManager.KEYBOARD_DESCRIPTOR.size)
     }
 
     @Test

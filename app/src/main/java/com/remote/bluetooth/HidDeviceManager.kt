@@ -25,54 +25,39 @@ class HidDeviceManager(
         const val SUBCLASS_KEYBOARD = 0x40.toByte()
 
         val KEYBOARD_DESCRIPTOR = byteArrayOf(
-            // Keyboard Report (Report ID 1)
+            // Standard 63-byte Boot Keyboard Descriptor (Report ID 0)
             0x05, 0x01,       // Usage Page (Generic Desktop)
             0x09, 0x06,       // Usage (Keyboard)
-            0xA1.toByte(), 0x01,       // Collection (Application)
-            0x85.toByte(), 0x01,       // Report ID (1)
+            0xA1.toByte(), 0x01, // Collection (Application)
             0x05, 0x07,       // Usage Page (Key Codes)
-            0x19, 0xE0.toByte(),       // Usage Minimum (224)
-            0x29, 0xE7.toByte(),       // Usage Maximum (231)
+            0x19, 0xE0.toByte(), // Usage Minimum (224)
+            0x29, 0xE7.toByte(), // Usage Maximum (231)
             0x15, 0x00,       // Logical Minimum (0)
             0x25, 0x01,       // Logical Maximum (1)
             0x75, 0x01,       // Report Size (1)
-            0x95.toByte(), 0x08,       // Report Count (8)
-            0x81.toByte(), 0x02,       // Input (Data, Variable, Absolute)
-            0x95.toByte(), 0x01,       // Report Count (1)
+            0x95.toByte(), 0x08, // Report Count (8)
+            0x81.toByte(), 0x02, // Input (Data, Variable, Absolute)
+            0x95.toByte(), 0x01, // Report Count (1)
             0x75, 0x08,       // Report Size (8)
-            0x81.toByte(), 0x01,       // Input (Constant) reserved byte(1)
-            0x95.toByte(), 0x05,       // Report Count (5)
+            0x81.toByte(), 0x01, // Input (Constant) reserved byte(1)
+            0x95.toByte(), 0x05, // Report Count (5)
             0x75, 0x01,       // Report Size (1)
             0x05, 0x08,       // Usage Page (Page# for LEDs)
             0x19, 0x01,       // Usage Minimum (1)
             0x29, 0x05,       // Usage Maximum (5)
-            0x91.toByte(), 0x02,       // Output (Data, Variable, Absolute), Led report
-            0x95.toByte(), 0x01,       // Report Count (1)
+            0x91.toByte(), 0x02, // Output (Data, Variable, Absolute), Led report
+            0x95.toByte(), 0x01, // Report Count (1)
             0x75, 0x03,       // Report Size (3)
-            0x91.toByte(), 0x01,       // Output (Data, Variable, Absolute), Led report padding
-            0x95.toByte(), 0x06,       // Report Count (6)
+            0x91.toByte(), 0x01, // Output (Data, Variable, Absolute), Led report padding
+            0x95.toByte(), 0x06, // Report Count (6)
             0x75, 0x08,       // Report Size (8)
             0x15, 0x00,       // Logical Minimum (0)
             0x25, 0x65,       // Logical Maximum (101)
             0x05, 0x07,       // Usage Page (Key codes)
             0x19, 0x00,       // Usage Minimum (0)
             0x29, 0x65,       // Usage Maximum (101)
-            0x81.toByte(), 0x00,       // Input (Data, Array) Key array(6 bytes)
-            0xC0.toByte(),             // End Collection (Application)
-
-            // Consumer Control Report (Report ID 2)
-            0x05, 0x0C,       // Usage Page (Consumer)
-            0x09, 0x01,       // Usage (Consumer Control)
-            0xA1.toByte(), 0x01,       // Collection (Application)
-            0x85.toByte(), 0x02,       // Report ID (2)
-            0x15, 0x00,       // Logical Minimum (0)
-            0x26, 0xFF.toByte(), 0x03, // Logical Maximum (1023)
-            0x19, 0x00,       // Usage Minimum (0)
-            0x2A.toByte(), 0xFF.toByte(), 0x03, // Usage Maximum (1023)
-            0x75, 0x10,       // Report Size (16)
-            0x95.toByte(), 0x01,       // Report Count (1)
-            0x81.toByte(), 0x00,       // Input (Data, Array, Absolute)
-            0xC0.toByte()              // End Collection
+            0x81.toByte(), 0x00, // Input (Data, Array) Key array(6 bytes)
+            0xC0.toByte()      // End Collection (Application)
         )
 
         fun buildKeyboardReport(modifier: Byte, keys: List<Byte>): ByteArray {
@@ -228,9 +213,9 @@ class HidDeviceManager(
         val device = getTargetDevice() ?: return false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val keyDown = buildKeyboardReport(modifier, listOf(usageId))
-            val sentDown = sendReport(device, 1, keyDown) || sendReport(device, 0, keyDown)
+            val sentDown = sendReport(device, 0, keyDown)
             val keyUp = buildKeyboardReport(0, emptyList())
-            val sentUp = sendReport(device, 1, keyUp) || sendReport(device, 0, keyUp)
+            val sentUp = sendReport(device, 0, keyUp)
             return sentDown && sentUp
         }
         return false
@@ -308,25 +293,8 @@ class HidDeviceManager(
         }
 
         this.hidDevice = proxy
-        val outQos = BluetoothHidDeviceAppQosSettings(
-            BluetoothHidDeviceAppQosSettings.SERVICE_BEST_EFFORT,
-            800,
-            9,
-            0,
-            11250,
-            -1
-        )
-        val inQos = BluetoothHidDeviceAppQosSettings(
-            BluetoothHidDeviceAppQosSettings.SERVICE_BEST_EFFORT,
-            800,
-            9,
-            0,
-            11250,
-            -1
-        )
-
         try {
-            proxy.registerApp(sdpSettings, inQos, outQos, executor, callback)
+            proxy.registerApp(sdpSettings, null, null, executor, callback)
         } catch (e: SecurityException) {
             Log.e(TAG, "SecurityException on registerApp", e)
         }
