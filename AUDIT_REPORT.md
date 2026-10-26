@@ -1,16 +1,17 @@
 # Repository Quality & Stability Assessment
 
 ## Executive Summary
-The codebase overall health is moderate. Critical stability deficiencies like blocking I/O on the BLE task and threading issues in Kotlin flows were identified and need to be addressed. There are still multiple deprecated API usages (API 33+) around Bluetooth characteristic and descriptor reads/writes, as well as some incomplete UI integrations and swallowed network exceptions that need attention to fully guarantee application robustness and adherence to modern Android idioms.
 
+The codebase overall health is moderate. Critical stability deficiencies like blocking I/O on the BLE task and threading issues in Kotlin flows were identified and need to be addressed. There are still multiple deprecated API usages (API 33+) around Bluetooth characteristic and descriptor reads/writes, as well as some incomplete UI integrations and swallowed network exceptions that need attention to fully guarantee application robustness and adherence to modern Android idioms.
 
 The repository presents a solid foundation for a multi-target remote control application bridging Android, BLE, and embedded hardware. However, it suffers from significant runtime stability and security risks, particularly concerning Bluetooth pairing configurations, binder thread execution deadlocks, and blocking operations in hardware interrupt contexts. Linter compliance and error handling need improvement to prevent silent failures and ensure edge-case resilience. Overall, the architecture requires remediation of P0/P1 issues before production deployment.
 
 ## P0: Critical Quality & Stability Deficiencies
 
 - [x] `[P0-01][HARD]` `Static Bluetooth Pairing PIN`: `firmware/src/ble_sec.cpp:7` - Hardcoded static PIN (123456) defeats pairing security and exposes device to MITM attacks. Remediation: Implement secure random PIN generation or Out-of-Band (OOB) authentication.
-  - *Remediation Note*: Verified dynamic passkey generation in `firmware/src/ble_sec.cpp` using hardware random number generator (`esp_random() % 1000000`) and enhanced test assertions in `firmware/test/test_ble_sec/test_ble_sec.cpp`.
-- [ ] `[P0-02][HARD]` `Binder Thread Deadlock Risk`: `app/src/main/java/com/remote/bluetooth/HidDeviceManager.kt:116` - Executing Bluetooth HID callbacks synchronously on the binder thread (`{ it.run() }`) blocks IPC and can cause ANRs. Remediation: Provide a dedicated background `Executor` or Main thread handler.
+  - _Remediation Note_: Verified dynamic passkey generation in `firmware/src/ble_sec.cpp` using hardware random number generator (`esp_random() % 1000000`) and enhanced test assertions in `firmware/test/test_ble_sec/test_ble_sec.cpp`.
+- [x] `[P0-02][HARD]` `Binder Thread Deadlock Risk`: `app/src/main/java/com/remote/bluetooth/HidDeviceManager.kt:116` - Executing Bluetooth HID callbacks synchronously on the binder thread (`{ it.run() }`) blocks IPC and can cause ANRs. Remediation: Provide a dedicated background `Executor` or Main thread handler.
+  - _Remediation Note_: Updated `HidDeviceManager` constructor to accept a configurable background `Executor` (defaulting to a single-thread executor `Executors.newSingleThreadExecutor()`) and passed it to `BluetoothHidDevice.registerApp` so HID app status and connection callbacks are executed asynchronously on a dedicated background thread rather than blocking binder IPC thread.
 - [ ] `[P0-03][HARD]` `Missing Bluetooth Permissions Validation`: `app/src/main/java/com/remote/bluetooth/BleGattManager.kt:15` - `@SuppressLint("MissingPermission")` suppresses critical runtime permission checks (e.g., BLUETOOTH_CONNECT), which will cause `SecurityException` crashes on Android 12+ (API 31+) if permissions are denied. Remediation: Implement runtime permission request flow and validate before invoking GATT operations.
 
 ## P1: Concurrency, Error Handling & Logic Bugs
@@ -32,7 +33,6 @@ The repository presents a solid foundation for a multi-target remote control app
 - [ ] `[P2-04][EASY]` `Empty Catch Blocks in Discovery`: `app/src/main/java/com/remote/network/SsdpDiscovery.kt:39` - Catching generic exceptions (`try { performSsdpDiscovery() } catch (e: Exception) {}`) without logging during SSDP fallback sweeps. Trigger condition: Network failures during SSDP are silently ignored. Proposed fix: Log the exception to aid in debugging connection issues.
 
 ## P3: Maintenance & Idiomatic Best Practices
-
 
 - [ ] `[P3-01][EASY]` `Deprecated API Usage`: `app/src/main/java/com/remote/bluetooth/BleGattManager.kt:79` - Accessing `characteristic.value` directly is deprecated in Android 13 (API 33). Linter warning. Remediation: Override the new `onCharacteristicChanged(BluetoothGatt, BluetoothGattCharacteristic, ByteArray)` callback signature introduced in TIRAMISU.
 - [ ] `[P3-02][EASY]` `Incomplete Edge Case Handling`: `app/src/main/java/com/remote/bluetooth/KeyTranslator.kt:94` - Unsupported characters map to `null`, which are silently skipped in `PrecomposeBufferInjector`. Idiom deviation. Remediation: Fallback to an alternative input method or log explicit warnings for skipped inputs.

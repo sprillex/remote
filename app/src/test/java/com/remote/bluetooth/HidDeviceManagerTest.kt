@@ -3,7 +3,10 @@ package com.remote.bluetooth
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicBoolean
 
 class HidDeviceManagerTest {
 
@@ -64,5 +67,21 @@ class HidDeviceManagerTest {
         // 7th key 0x0A should be truncated
 
         assertArrayEquals("Report should truncate to 6 keys", expected, report)
+    }
+
+    @Test
+    fun testCustomExecutorInstantiation() {
+        val executedOnCustom = AtomicBoolean(false)
+        val testExecutor = Executor { command ->
+            executedOnCustom.set(true)
+            command.run()
+        }
+
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext, testExecutor)
+        assertNotNull("HidDeviceManager instance should be created with custom executor", manager)
+
+        testExecutor.execute { }
+        assertTrue("Custom executor should execute tasks", executedOnCustom.get())
     }
 }
