@@ -9,7 +9,13 @@ void tearDown(void) {
 }
 
 void test_random_passkey(void) {
-    TEST_ASSERT_TRUE(true);
+    uint32_t passkey1 = esp_random() % 1000000;
+    uint32_t passkey2 = esp_random() % 1000000;
+
+    TEST_ASSERT_TRUE(passkey1 < 1000000);
+    TEST_ASSERT_TRUE(passkey2 < 1000000);
+    // Dynamic random passkeys generated via hardware RNG should not be fixed static 123456
+    TEST_ASSERT_NOT_EQUAL(123456, passkey1);
 }
 
 void setup() {

@@ -4,6 +4,7 @@
 class SecurityCallbacks : public NimBLESecurityCallbacks {
     uint32_t onPassKeyRequest(){
         Serial.println("PassKeyRequest");
+        // Secure dynamic passkey generation using hardware RNG (esp_random)
         uint32_t passkey = esp_random() % 1000000;
         Serial.printf("Generated passkey: %06" PRIu32 "\n", passkey);
         return passkey;

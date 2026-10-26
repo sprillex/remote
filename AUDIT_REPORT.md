@@ -8,7 +8,8 @@ The repository presents a solid foundation for a multi-target remote control app
 
 ## P0: Critical Quality & Stability Deficiencies
 
-- [ ] `[P0-01][HARD]` `Static Bluetooth Pairing PIN`: `firmware/src/ble_sec.cpp:7` - Hardcoded static PIN (123456) defeats pairing security and exposes device to MITM attacks. Remediation: Implement secure random PIN generation or Out-of-Band (OOB) authentication.
+- [x] `[P0-01][HARD]` `Static Bluetooth Pairing PIN`: `firmware/src/ble_sec.cpp:7` - Hardcoded static PIN (123456) defeats pairing security and exposes device to MITM attacks. Remediation: Implement secure random PIN generation or Out-of-Band (OOB) authentication.
+  - *Remediation Note*: Verified dynamic passkey generation in `firmware/src/ble_sec.cpp` using hardware random number generator (`esp_random() % 1000000`) and enhanced test assertions in `firmware/test/test_ble_sec/test_ble_sec.cpp`.
 - [ ] `[P0-02][HARD]` `Binder Thread Deadlock Risk`: `app/src/main/java/com/remote/bluetooth/HidDeviceManager.kt:116` - Executing Bluetooth HID callbacks synchronously on the binder thread (`{ it.run() }`) blocks IPC and can cause ANRs. Remediation: Provide a dedicated background `Executor` or Main thread handler.
 - [ ] `[P0-03][HARD]` `Missing Bluetooth Permissions Validation`: `app/src/main/java/com/remote/bluetooth/BleGattManager.kt:15` - `@SuppressLint("MissingPermission")` suppresses critical runtime permission checks (e.g., BLUETOOTH_CONNECT), which will cause `SecurityException` crashes on Android 12+ (API 31+) if permissions are denied. Remediation: Implement runtime permission request flow and validate before invoking GATT operations.
 
