@@ -237,18 +237,6 @@ class HidDeviceManager(
     }
 
     fun sendMediaKey(mediaUsageId: Int): Boolean {
-        val device = getTargetDevice() ?: return false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val keyDown = buildConsumerReport(mediaUsageId)
-            val sentDown = sendReport(device, 2, keyDown)
-            val keyUp = buildConsumerReport(0)
-            val sentUp = sendReport(device, 2, keyUp)
-            return sentDown && sentUp
-        }
-        return false
-    }
-
-    fun sendMediaKey(mediaUsageId: Int): Boolean {
         val (usageId, modifier) = when (mediaUsageId) {
             MediaKey.VOLUME_UP -> Pair(0x80.toByte(), 0.toByte())
             MediaKey.VOLUME_DOWN -> Pair(0x81.toByte(), 0.toByte())
