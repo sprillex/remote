@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.util.UUID
 
-class BleGattManager(private val context: Context) {
+class BleGattManager(private val context: Context? = null) {
     companion object {
         private const val TAG = "BleGattManager"
         // Nordic UART Service UUIDs
@@ -25,9 +25,38 @@ class BleGattManager(private val context: Context) {
         val CLIENT_CHARACTERISTIC_CONFIG_UUID: UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
     }
 
-    private fun hasPermission(): Boolean {
+    private fun logE(msg: String, throwable: Throwable? = null) {
+        if (context != null) {
+            try {
+                if (throwable != null) {
+                    Log.e(TAG, msg, throwable)
+                } else {
+                    Log.e(TAG, msg)
+                }
+            } catch (_: RuntimeException) {}
+        }
+    }
+
+    private fun logD(msg: String) {
+        if (context != null) {
+            try {
+                Log.d(TAG, msg)
+            } catch (_: RuntimeException) {}
+        }
+    }
+
+    private fun logW(msg: String) {
+        if (context != null) {
+            try {
+                Log.w(TAG, msg)
+            } catch (_: RuntimeException) {}
+        }
+    }
+
+    fun hasPermission(): Boolean {
+        val ctx = context ?: return false
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            return ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+            return ActivityCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
         }
         return true
     }
@@ -45,47 +74,43 @@ class BleGattManager(private val context: Context) {
     private val gattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
-            Log.d(TAG, "Connection state changed: $newState")
+            logD("Connection state changed: $newState")
             _connectionState.tryEmit(newState)
             
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                Log.d(TAG, "Attempting to start service discovery")
+                logD("Attempting to start service discovery")
                 if (hasPermission()) {
                     try {
                         gatt.discoverServices()
                     } catch (e: SecurityException) {
-                        Log.e(TAG, "SecurityException on discoverServices", e)
+                        logE("SecurityException on discoverServices", e)
+                    } catch (e: Exception) {
+                        logE("Exception on discoverServices", e)
                     }
                 } else {
-                    Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
+                    logE("Missing BLUETOOTH_CONNECT permission in onConnectionStateChange")
                 }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                Log.d(TAG, "Disconnected from GATT server")
-                if (hasPermission()) {
-                    try {
-                        close()
-                    } catch (e: SecurityException) {
-                        Log.e(TAG, "SecurityException on close", e)
-                    }
-                }
+                logD("Disconnected from GATT server")
+                close()
             }
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             super.onServicesDiscovered(gatt, status)
             if (status != BluetoothGatt.GATT_SUCCESS) {
-                Log.e(TAG, "Service discovery failed with status: $status")
+                logE("Service discovery failed with status: $status")
                 return
             }
 
             if (!hasPermission()) {
-                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission in onServicesDiscovered")
+                logE("Missing BLUETOOTH_CONNECT permission in onServicesDiscovered")
                 return
             }
 
             val service = gatt.getService(NUS_SERVICE_UUID)
             if (service == null) {
-                Log.w(TAG, "NUS service not found")
+                logW("NUS service not found")
                 return
             }
 
@@ -108,7 +133,9 @@ class BleGattManager(private val context: Context) {
                         }
                     }
                 } catch (e: SecurityException) {
-                    Log.e(TAG, "SecurityException configuring characteristics", e)
+                    logE("SecurityException configuring characteristics", e)
+                } catch (e: Exception) {
+                    logE("Exception configuring characteristics", e)
                 }
             }
         }
@@ -138,21 +165,40 @@ class BleGattManager(private val context: Context) {
                         _incomingData.tryEmit(value)
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Exception on onCharacteristicChanged", e)
+                    logE("Exception on onCharacteristicChanged", e)
                 }
             }
         }
     }
 
-    fun connect(device: BluetoothDevice) {
+    fun connect(device: BluetoothDevice): Boolean {
+        if (!hasPermission()) {
+            logE("Missing BLUETOOTH_CONNECT permission on connect")
+            return false
+        }
+        return try {
+            bluetoothGatt = device.connectGatt(context, false, gattCallback)
+            bluetoothGatt != null
+        } catch (e: SecurityException) {
+            logE("SecurityException on connect", e)
+            false
+        } catch (e: Exception) {
+            logE("Exception on connect", e)
+            false
+        }
+    }
+
+    fun disconnect() {
         if (hasPermission()) {
             try {
-                bluetoothGatt = device.connectGatt(context, false, gattCallback)
+                bluetoothGatt?.disconnect()
             } catch (e: SecurityException) {
-                Log.e(TAG, "SecurityException on connect", e)
+                logE("SecurityException on disconnect", e)
+            } catch (e: Exception) {
+                logE("Exception on disconnect", e)
             }
         } else {
-            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
+            logE("Missing BLUETOOTH_CONNECT permission on disconnect")
         }
     }
 
@@ -161,26 +207,26 @@ class BleGattManager(private val context: Context) {
         val gatt = bluetoothGatt ?: return false
         val rx = rxCharacteristic ?: return false
         
-        if (hasPermission()) {
-            try {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                    val status = gatt.writeCharacteristic(rx, data, rx.writeType)
-                    return status == android.bluetooth.BluetoothStatusCodes.SUCCESS
-                } else {
-                    rx.value = data
-                    return gatt.writeCharacteristic(rx)
-                }
-            } catch (e: SecurityException) {
-                Log.e(TAG, "SecurityException on sendData", e)
-                return false
-            } catch (e: Exception) {
-                Log.e(TAG, "Exception on sendData", e)
-                return false
-            }
+        if (!hasPermission()) {
+            logE("Missing BLUETOOTH_CONNECT permission on sendData")
+            return false
         }
 
-        Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
-        return false
+        return try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                val status = gatt.writeCharacteristic(rx, data, rx.writeType)
+                status == android.bluetooth.BluetoothStatusCodes.SUCCESS
+            } else {
+                rx.value = data
+                gatt.writeCharacteristic(rx)
+            }
+        } catch (e: SecurityException) {
+            logE("SecurityException on sendData", e)
+            false
+        } catch (e: Exception) {
+            logE("Exception on sendData", e)
+            false
+        }
     }
 
     fun close() {
@@ -188,10 +234,12 @@ class BleGattManager(private val context: Context) {
             try {
                 bluetoothGatt?.close()
             } catch (e: SecurityException) {
-                Log.e(TAG, "SecurityException on close", e)
+                logE("SecurityException on close", e)
+            } catch (e: Exception) {
+                logE("Exception on close", e)
             }
-        } else {
-            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")
+        } else if (context != null) {
+            logE("Missing BLUETOOTH_CONNECT permission on close")
         }
         bluetoothGatt = null
         rxCharacteristic = null
