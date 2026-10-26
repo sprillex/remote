@@ -75,4 +75,17 @@ class KeyTranslatorTest {
         val report = KeyTranslator.translate('§')
         assertNull(report)
     }
+
+    @Test
+    fun testMediaKeyConstants() {
+        assertEquals(0x00CD, MediaKey.PLAY_PAUSE)
+        assertEquals(0x00B5, MediaKey.NEXT_TRACK)
+        assertEquals(0x00B6, MediaKey.PREV_TRACK)
+        assertEquals(0x00B7, MediaKey.STOP)
+        assertEquals(0x00E9, MediaKey.VOLUME_UP)
+        assertEquals(0x00EA, MediaKey.VOLUME_DOWN)
+        assertEquals(0x00E2, MediaKey.MUTE)
+        assertEquals(0x0223, MediaKey.HOME)
+        assertEquals(0x0224, MediaKey.BACK)
+    }
 }

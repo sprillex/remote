@@ -14,7 +14,7 @@ class HidDeviceManagerTest {
     fun testKeyboardDescriptorSize() {
         assertNotNull("KEYBOARD_DESCRIPTOR must not be null", HidDeviceManager.KEYBOARD_DESCRIPTOR)
         // Check descriptor has expected bytes (just verifying it's not empty and contains HID info)
-        assertEquals("KEYBOARD_DESCRIPTOR length is incorrect", 63, HidDeviceManager.KEYBOARD_DESCRIPTOR.size)
+        assertEquals("KEYBOARD_DESCRIPTOR length is incorrect", 90, HidDeviceManager.KEYBOARD_DESCRIPTOR.size)
     }
 
     @Test
@@ -116,5 +116,21 @@ class HidDeviceManagerTest {
         val manager = HidDeviceManager(mockContext)
         val result = manager.sendChar('a')
         org.junit.Assert.assertFalse("sendChar without target device should return false", result)
+    }
+
+    @Test
+    fun testBuildConsumerReport() {
+        val report = HidDeviceManager.buildConsumerReport(MediaKey.PLAY_PAUSE)
+        assertEquals(2, report.size)
+        assertEquals((0xCD).toByte(), report[0])
+        assertEquals((0x00).toByte(), report[1])
+    }
+
+    @Test
+    fun testSendMediaKeyWithoutTargetDeviceReturnsFalse() {
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext)
+        val result = manager.sendMediaKey(MediaKey.PLAY_PAUSE)
+        org.junit.Assert.assertFalse("sendMediaKey without target device should return false", result)
     }
 }
