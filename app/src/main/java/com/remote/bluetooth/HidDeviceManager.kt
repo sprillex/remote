@@ -25,9 +25,11 @@ class HidDeviceManager(
         const val SUBCLASS_KEYBOARD = 0x40.toByte()
 
         val KEYBOARD_DESCRIPTOR = byteArrayOf(
+            // Keyboard Report (Report ID 1)
             0x05, 0x01,       // Usage Page (Generic Desktop)
             0x09, 0x06,       // Usage (Keyboard)
             0xA1.toByte(), 0x01,       // Collection (Application)
+            0x85.toByte(), 0x01,       // Report ID (1)
             0x05, 0x07,       // Usage Page (Key Codes)
             0x19, 0xE0.toByte(),       // Usage Minimum (224)
             0x29, 0xE7.toByte(),       // Usage Maximum (231)
@@ -56,7 +58,21 @@ class HidDeviceManager(
             0x19, 0x00,       // Usage Minimum (0)
             0x29, 0x65,       // Usage Maximum (101)
             0x81.toByte(), 0x00,       // Input (Data, Array) Key array(6 bytes)
-            0xC0.toByte()              // End Collection (Application)
+            0xC0.toByte(),             // End Collection (Application)
+
+            // Consumer Control Report (Report ID 2)
+            0x05, 0x0C,       // Usage Page (Consumer)
+            0x09, 0x01,       // Usage (Consumer Control)
+            0xA1.toByte(), 0x01,       // Collection (Application)
+            0x85.toByte(), 0x02,       // Report ID (2)
+            0x15, 0x00,       // Logical Minimum (0)
+            0x26, 0xFF.toByte(), 0x03, // Logical Maximum (1023)
+            0x19, 0x00,       // Usage Minimum (0)
+            0x2A.toByte(), 0xFF.toByte(), 0x03, // Usage Maximum (1023)
+            0x75, 0x10,       // Report Size (16)
+            0x95.toByte(), 0x01,       // Report Count (1)
+            0x81.toByte(), 0x00,       // Input (Data, Array, Absolute)
+            0xC0.toByte()              // End Collection
         )
 
         fun buildKeyboardReport(modifier: Byte, keys: List<Byte>): ByteArray {
@@ -68,6 +84,13 @@ class HidDeviceManager(
             for (i in 0 until minOf(keys.size, 6)) {
                 report[2 + i] = keys[i]
             }
+            return report
+        }
+
+        fun buildConsumerReport(mediaUsageId: Int): ByteArray {
+            val report = ByteArray(2)
+            report[0] = (mediaUsageId and 0xFF).toByte()
+            report[1] = ((mediaUsageId shr 8) and 0xFF).toByte()
             return report
         }
     }
@@ -205,9 +228,21 @@ class HidDeviceManager(
         val device = getTargetDevice() ?: return false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val keyDown = buildKeyboardReport(modifier, listOf(usageId))
-            val sentDown = sendReport(device, 0, keyDown)
+            val sentDown = sendReport(device, 1, keyDown) || sendReport(device, 0, keyDown)
             val keyUp = buildKeyboardReport(0, emptyList())
-            val sentUp = sendReport(device, 0, keyUp)
+            val sentUp = sendReport(device, 1, keyUp) || sendReport(device, 0, keyUp)
+            return sentDown && sentUp
+        }
+        return false
+    }
+
+    fun sendMediaKey(mediaUsageId: Int): Boolean {
+        val device = getTargetDevice() ?: return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val keyDown = buildConsumerReport(mediaUsageId)
+            val sentDown = sendReport(device, 2, keyDown)
+            val keyUp = buildConsumerReport(0)
+            val sentUp = sendReport(device, 2, keyUp)
             return sentDown && sentUp
         }
         return false
