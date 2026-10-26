@@ -117,4 +117,12 @@ class HidDeviceManagerTest {
         val result = manager.sendChar('a')
         org.junit.Assert.assertFalse("sendChar without target device should return false", result)
     }
+
+    @Test
+    fun testSendMediaKeyWithoutTargetDeviceReturnsFalse() {
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext)
+        val result = manager.sendMediaKey(MediaKey.PLAY_PAUSE)
+        org.junit.Assert.assertFalse("sendMediaKey without target device should return false", result)
+    }
 }
