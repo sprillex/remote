@@ -31,6 +31,11 @@ class EntitiesTest {
         val restored = converters.toProfileType(profileStr)
         assertEquals(ProfileType.PC_KEYBOARD, restored)
 
+        val androidProfile = ProfileType.ANDROID_DEVICE
+        val androidStr = converters.fromProfileType(androidProfile)
+        assertEquals("ANDROID_DEVICE", androidStr)
+        assertEquals(ProfileType.ANDROID_DEVICE, converters.toProfileType(androidStr))
+
         assertNull(converters.toProfileType("INVALID_PROFILE"))
         assertNull(converters.toProfileType(null))
     }
