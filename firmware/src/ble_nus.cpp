@@ -3,6 +3,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include "ring_buffer.h"
+#include "ir_tx.h"
+#include <IRremoteESP8266.h>
 
 #define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
@@ -52,9 +54,17 @@ class MyCallbacks: public NimBLECharacteristicCallbacks {
                 }
             }
         } else if (opcode == OPCODE_IR_NEC || opcode == OPCODE_IR_SONY ||
-                   opcode == OPCODE_IR_RC5 || opcode == OPCODE_IR_RAW) {
-            // Safely drop IR frames for now, to be implemented in Task 5.1
-            Serial.printf("Received IR opcode: 0x%02X, length: %d\n", opcode, rxValue.length());
+                   opcode == OPCODE_IR_RC5) {
+            // Safely parse IR frames and send
+            if (rxValue.length() >= 9) { // 1 byte opcode + 8 bytes data
+                uint64_t data = 0;
+                memcpy(&data, rxValue.data() + 1, 8);
+                uint16_t nbits = (opcode == OPCODE_IR_SONY) ? 12 : (opcode == OPCODE_IR_RC5 ? 12 : 32); // Default nbits based on protocol, should ideally be passed in
+                sendIrCommand(opcode, data, nbits);
+            }
+        } else if (opcode == OPCODE_IR_RAW) {
+            // Drop raw for now
+            Serial.printf("Received IR raw opcode: 0x%02X, length: %d\n", opcode, rxValue.length());
         } else {
             // Unknown opcode, drop
             Serial.printf("Received unknown opcode: 0x%02X\n", opcode);

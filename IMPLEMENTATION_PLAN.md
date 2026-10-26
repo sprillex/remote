@@ -54,7 +54,7 @@
 - **Core Technical Requirements:** Bash script configuring Linux ConfigFS.
 - **Verification Criteria:** `shellcheck scripts/pi_gadget.sh`
 
-### Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library. [HARD]
+### Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library. [RESOLVED]
 
 - **Target Files:** `firmware/src/ir_tx.cpp` (Create)
 - **Core Technical Requirements:** RMT peripheral integration for 38kHz infrared transmission.
