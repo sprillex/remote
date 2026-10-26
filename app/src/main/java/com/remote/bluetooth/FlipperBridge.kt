@@ -139,13 +139,39 @@ class FlipperBridge(private val context: Context? = null) {
         }
     }
 
+    fun pairDevice(device: BluetoothDevice): Boolean {
+        if (!hasPermission()) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission to pair device")
+            return false
+        }
+        return try {
+            if (device.bondState == BluetoothDevice.BOND_NONE) {
+                device.createBond()
+            } else {
+                true
+            }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "SecurityException on pairDevice", e)
+            false
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception on pairDevice", e)
+            false
+        }
+    }
+
     fun connect(device: BluetoothDevice) {
         context?.let { ctx ->
             if (hasPermission()) {
                 try {
+                    if (device.bondState == BluetoothDevice.BOND_NONE) {
+                        Log.d(TAG, "Device not bonded, initiating pairing")
+                        pairDevice(device)
+                    }
                     bluetoothGatt = device.connectGatt(ctx, false, gattCallback)
                 } catch (e: SecurityException) {
                     Log.e(TAG, "SecurityException on connect", e)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Exception on connect", e)
                 }
             } else {
                 Log.e(TAG, "Missing BLUETOOTH_CONNECT permission")

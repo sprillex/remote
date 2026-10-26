@@ -32,4 +32,10 @@ class BleGattManagerTest {
         manager.disconnect()
         manager.close()
     }
+
+    @Test
+    fun testPairDeviceWithoutPermissionReturnsFalse() {
+        val manager = BleGattManager(null)
+        assertFalse(manager.hasPermission())
+    }
 }
