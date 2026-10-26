@@ -6,7 +6,7 @@
 - **Core Technical Requirements:** PCM byte array generation for IR modulation via headphone jack.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 5.5: Implement USB Host CDC-ACM serial driver for USB-C IR dongles. [HARD]
+### Task 5.5: Implement USB Host CDC-ACM serial driver for USB-C IR dongles. [RESOLVED]
 
 - **Target Files:** `app/src/main/java/com/remote/usb/UsbCdcDriver.kt` (Create)
 - **Core Technical Requirements:** Android USB Host API integration for external serial adapters.
