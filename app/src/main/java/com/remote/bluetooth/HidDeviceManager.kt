@@ -11,9 +11,13 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-class HidDeviceManager(private val context: Context) {
+class HidDeviceManager(
+    private val context: Context,
+    private val executor: Executor = Executors.newSingleThreadExecutor()
+) {
 
     companion object {
         private const val TAG = "HidDeviceManager"
@@ -104,8 +108,6 @@ class HidDeviceManager(private val context: Context) {
             }
         } else null
     }
-
-    private val executor = Executors.newSingleThreadExecutor()
 
     @RequiresApi(Build.VERSION_CODES.P)
     fun registerApp(proxy: BluetoothHidDevice) {
