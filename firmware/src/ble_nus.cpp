@@ -10,13 +10,6 @@
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
-// Protocol Opcodes
-#define OPCODE_HID     0x01
-#define OPCODE_IR_NEC  0x02
-#define OPCODE_IR_SONY 0x03
-#define OPCODE_IR_RC5  0x04
-#define OPCODE_IR_RAW  0x05
-
 NimBLEServer *pServer = NULL;
 NimBLECharacteristic * pTxCharacteristic;
 
@@ -40,41 +33,43 @@ class MyCallbacks: public NimBLECharacteristicCallbacks {
       if (rxValue.length() > 0) {
         uint8_t opcode = rxValue[0];
 
+        NusFrame frame = {0};
+        frame.opcode = opcode;
+
         if (opcode == OPCODE_HID) {
-            // Push incoming HID command frames to FreeRTOS queue
-            HidReport report = {0};
             size_t payload_len = rxValue.length() - 1;
             if (payload_len > sizeof(HidReport)) {
                 payload_len = sizeof(HidReport);
             }
             if (payload_len > 0) {
-                memcpy(&report, rxValue.data() + 1, payload_len);
-                if (xQueueSend(bleRxQueue, &report, 0) != pdPASS) {
-                    // Queue full, drop packet
-                }
+                memcpy(&frame.payload.hid, rxValue.data() + 1, payload_len);
+                xQueueSend(bleRxQueue, &frame, 0);
             }
         } else if (opcode == OPCODE_IR_NEC || opcode == OPCODE_IR_SONY ||
                    opcode == OPCODE_IR_RC5) {
-            // Safely parse IR frames and send
             if (rxValue.length() >= 9) { // 1 byte opcode + 8 bytes data
                 uint64_t data = 0;
                 memcpy(&data, rxValue.data() + 1, 8);
-                uint16_t nbits = (opcode == OPCODE_IR_SONY) ? 12 : (opcode == OPCODE_IR_RC5 ? 12 : 32); // Default nbits based on protocol, should ideally be passed in
-                sendIrCommand(opcode, data, nbits);
+                uint16_t nbits = (opcode == OPCODE_IR_SONY) ? 12 : (opcode == OPCODE_IR_RC5 ? 12 : 32);
+                frame.payload.ir.data = data;
+                frame.payload.ir.nbits = nbits;
+                xQueueSend(bleRxQueue, &frame, 0);
             }
         } else if (opcode == OPCODE_IR_RAW) {
-            // Drop raw for now
-            Serial.printf("Received IR raw opcode: 0x%02X, length: %d\n", opcode, rxValue.length());
+            frame.payload.unknown.raw_opcode = opcode;
+            frame.payload.unknown.length = rxValue.length();
+            xQueueSend(bleRxQueue, &frame, 0);
         } else {
-            // Unknown opcode, drop
-            Serial.printf("Received unknown opcode: 0x%02X\n", opcode);
+            frame.payload.unknown.raw_opcode = opcode;
+            frame.payload.unknown.length = rxValue.length();
+            xQueueSend(bleRxQueue, &frame, 0);
         }
       }
     }
 };
 
 void setupBleNus() {
-  bleRxQueue = xQueueCreate(10, sizeof(HidReport));
+  bleRxQueue = xQueueCreate(10, sizeof(NusFrame));
 
   NimBLEDevice::init("NimBLE_NUS");
 
@@ -104,17 +99,25 @@ void setupBleNus() {
 }
 
 void processBleTasks() {
-  HidReport report;
-  if (xQueueReceive(bleRxQueue, &report, 0) == pdPASS) {
-    // Parse incoming binary command frames
-    Serial.println("*********");
-    Serial.print("Received Value: ");
-    uint8_t* rawData = (uint8_t*)&report;
-    for (size_t i = 0; i < sizeof(HidReport); i++) {
-      Serial.print(rawData[i], HEX);
-      Serial.print(" ");
+  NusFrame frame;
+  if (xQueueReceive(bleRxQueue, &frame, 0) == pdPASS) {
+    if (frame.opcode == OPCODE_HID) {
+      Serial.println("*********");
+      Serial.print("Received Value: ");
+      uint8_t* rawData = (uint8_t*)&frame.payload.hid;
+      for (size_t i = 0; i < sizeof(HidReport); i++) {
+        Serial.print(rawData[i], HEX);
+        Serial.print(" ");
+      }
+      Serial.println();
+      Serial.println("*********");
+    } else if (frame.opcode == OPCODE_IR_NEC || frame.opcode == OPCODE_IR_SONY ||
+               frame.opcode == OPCODE_IR_RC5) {
+      sendIrCommand(frame.opcode, frame.payload.ir.data, frame.payload.ir.nbits);
+    } else if (frame.opcode == OPCODE_IR_RAW) {
+      Serial.printf("Received IR raw opcode: 0x%02X, length: %d\n", frame.payload.unknown.raw_opcode, (int)frame.payload.unknown.length);
+    } else {
+      Serial.printf("Received unknown opcode: 0x%02X\n", frame.payload.unknown.raw_opcode);
     }
-    Serial.println();
-    Serial.println("*********");
   }
 }

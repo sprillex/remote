@@ -1,74 +1,81 @@
 #include <Arduino.h>
 #include <unity.h>
-#include "ring_buffer.h"
+#include "ble_nus.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
 QueueHandle_t bleRxQueue;
 
 void setUp(void) {
-    bleRxQueue = xQueueCreate(10, sizeof(HidReport));
+    bleRxQueue = xQueueCreate(10, sizeof(NusFrame));
 }
 
 void tearDown(void) {
     if (bleRxQueue != NULL) {
         vQueueDelete(bleRxQueue);
+        bleRxQueue = NULL;
     }
 }
 
-void test_hidreport_queue_size_and_type(void) {
-    HidReport report = {0};
-    report.modifiers = 0x01;
-    report.key1 = 0x02;
+void test_nusframe_hid_queue_and_parse(void) {
+    NusFrame frame = {0};
+    frame.opcode = OPCODE_HID;
+    frame.payload.hid.modifiers = 0x01;
+    frame.payload.hid.key1 = 0x02;
 
-    BaseType_t res = xQueueSend(bleRxQueue, &report, 0);
+    BaseType_t res = xQueueSend(bleRxQueue, &frame, 0);
     TEST_ASSERT_EQUAL(pdPASS, res);
 
-    HidReport received_report = {0};
-    res = xQueueReceive(bleRxQueue, &received_report, 0);
+    NusFrame rxFrame = {0};
+    res = xQueueReceive(bleRxQueue, &rxFrame, 0);
     TEST_ASSERT_EQUAL(pdPASS, res);
 
-    TEST_ASSERT_EQUAL(0x01, received_report.modifiers);
-    TEST_ASSERT_EQUAL(0x02, received_report.key1);
-    TEST_ASSERT_EQUAL(0x00, received_report.key2);
+    TEST_ASSERT_EQUAL(OPCODE_HID, rxFrame.opcode);
+    TEST_ASSERT_EQUAL(0x01, rxFrame.payload.hid.modifiers);
+    TEST_ASSERT_EQUAL(0x02, rxFrame.payload.hid.key1);
 }
 
-void test_opcode_parsing_hid_frame(void) {
-    // Note: since MyCallbacks::onWrite is private inside setupBleNus,
-    // we just verify that we are compiling the right opcodes and parsing them.
-    // In actual implementation, we simulate dropping the HID packet by ensuring
-    // parsing logic extracts correctly.
+void test_nusframe_ir_queue_and_parse(void) {
+    NusFrame frame = {0};
+    frame.opcode = OPCODE_IR_NEC;
+    frame.payload.ir.data = 0x1234567887654321ULL;
+    frame.payload.ir.nbits = 32;
 
-    // We can simulate parsing logic here since onWrite is embedded:
-    uint8_t rxData[] = {0x01, 0x02, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00}; // HID Opcode + Modifiers + Key1
-    size_t length = sizeof(rxData);
+    BaseType_t res = xQueueSend(bleRxQueue, &frame, 0);
+    TEST_ASSERT_EQUAL(pdPASS, res);
 
-    uint8_t opcode = rxData[0];
-    TEST_ASSERT_EQUAL(0x01, opcode); // OPCODE_HID
+    NusFrame rxFrame = {0};
+    res = xQueueReceive(bleRxQueue, &rxFrame, 0);
+    TEST_ASSERT_EQUAL(pdPASS, res);
 
-    HidReport report = {0};
-    size_t payload_len = length - 1;
-    if (payload_len > sizeof(HidReport)) {
-        payload_len = sizeof(HidReport);
-    }
-    memcpy(&report, rxData + 1, payload_len);
-    TEST_ASSERT_EQUAL(0x02, report.modifiers);
-    TEST_ASSERT_EQUAL(0x04, report.key1);
+    TEST_ASSERT_EQUAL(OPCODE_IR_NEC, rxFrame.opcode);
+    TEST_ASSERT_EQUAL_UINT64(0x1234567887654321ULL, rxFrame.payload.ir.data);
+    TEST_ASSERT_EQUAL(32, rxFrame.payload.ir.nbits);
 }
 
-void test_opcode_parsing_ir_frame(void) {
-    uint8_t rxData[] = {0x02, 0x00, 0xFF, 0x00, 0xAA}; // IR NEC Opcode
-    size_t length = sizeof(rxData);
+void test_nusframe_unknown_and_raw_opcode_queueing(void) {
+    NusFrame frame = {0};
+    frame.opcode = 0xFF; // Unknown opcode
+    frame.payload.unknown.raw_opcode = 0xFF;
+    frame.payload.unknown.length = 12;
 
-    uint8_t opcode = rxData[0];
-    TEST_ASSERT_EQUAL(0x02, opcode); // OPCODE_IR_NEC
+    BaseType_t res = xQueueSend(bleRxQueue, &frame, 0);
+    TEST_ASSERT_EQUAL(pdPASS, res);
+
+    NusFrame rxFrame = {0};
+    res = xQueueReceive(bleRxQueue, &rxFrame, 0);
+    TEST_ASSERT_EQUAL(pdPASS, res);
+
+    TEST_ASSERT_EQUAL(0xFF, rxFrame.opcode);
+    TEST_ASSERT_EQUAL(0xFF, rxFrame.payload.unknown.raw_opcode);
+    TEST_ASSERT_EQUAL(12, rxFrame.payload.unknown.length);
 }
 
 void setup() {
     UNITY_BEGIN();
-    RUN_TEST(test_hidreport_queue_size_and_type);
-    RUN_TEST(test_opcode_parsing_hid_frame);
-    RUN_TEST(test_opcode_parsing_ir_frame);
+    RUN_TEST(test_nusframe_hid_queue_and_parse);
+    RUN_TEST(test_nusframe_ir_queue_and_parse);
+    RUN_TEST(test_nusframe_unknown_and_raw_opcode_queueing);
     UNITY_END();
 }
 
