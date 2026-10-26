@@ -35,7 +35,7 @@ fun DeviceSurface(
     when (profileType) {
         ProfileType.PC_KEYBOARD -> FullKeyboardSurface(onSendKey, onSendMediaKey, onSendChar, onSendText)
         ProfileType.TV_REMOTE -> DPadTvRemoteSurface(onSendKey)
-        ProfileType.MEDIA_CONTROLLER -> MediaBarSurface(onSendKey, onSendMediaKey)
+        ProfileType.MEDIA_CONTROLLER -> MediaBarSurface(onSendMediaKey)
         ProfileType.PRESENTATION_CLICKER -> PresentationClickerSurface(onSendKey)
         ProfileType.TERMINAL_MACRO -> MacroPadSurface(onSendKey)
         ProfileType.SSH_SESSION -> MacroPadSurface(onSendKey)
@@ -267,7 +267,6 @@ fun DPadTvRemoteSurface(
 
 @Composable
 fun MediaBarSurface(
-    onSendKey: (usageId: Byte, modifier: Byte) -> Unit = { _, _ -> },
     onSendMediaKey: (mediaUsageId: Int) -> Unit = { _ -> }
 ) {
     Column(
