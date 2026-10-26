@@ -7,6 +7,7 @@ import com.remote.bluetooth.HidDeviceManager
 import com.remote.ir.AudioIrDriver
 import com.remote.network.RokuClient
 import com.remote.network.SshClientWrapper
+import com.remote.usb.UsbCdcDriver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +19,8 @@ class ConnectionRouter(
     private val bleManager: BleGattManager? = null,
     private val rokuClient: RokuClient? = null,
     private val flipperBridge: FlipperBridge? = null,
-    private val audioIrDriver: AudioIrDriver? = null
+    private val audioIrDriver: AudioIrDriver? = null,
+    private val usbCdcDriver: UsbCdcDriver? = null
 ) {
     private val _activeDevice = MutableStateFlow<TargetDeviceEntity?>(null)
     val activeDevice: StateFlow<TargetDeviceEntity?> = _activeDevice.asStateFlow()
@@ -98,10 +100,13 @@ class ConnectionRouter(
                 flipperBridge?.close()
                 Result.success(Unit)
             }
+            com.remote.db.ConnectionType.USB_IR_DONGLE -> {
+                usbCdcDriver?.close()
+                Result.success(Unit)
+            }
             com.remote.db.ConnectionType.ROKU_ECP_WIFI,
             com.remote.db.ConnectionType.AUDIO_JACK_IR,
             com.remote.db.ConnectionType.INTERNAL_IR,
-            com.remote.db.ConnectionType.USB_IR_DONGLE,
             com.remote.db.ConnectionType.ESP32_IR_EMITTER,
             com.remote.db.ConnectionType.ESP32_HYBRID -> {
                 Result.success(Unit)
