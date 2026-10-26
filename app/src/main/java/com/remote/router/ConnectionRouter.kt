@@ -89,16 +89,36 @@ class ConnectionRouter(
                 }
             }
             com.remote.db.ConnectionType.DIRECT_BT_HID -> {
-                // Not supported
-                Result.success(Unit)
+                try {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P && !device.macAddress.isNullOrBlank()) {
+                        @Suppress("DEPRECATION")
+                        val adapter = try { android.bluetooth.BluetoothAdapter.getDefaultAdapter() } catch (_: Throwable) { null }
+                        val btDevice = adapter?.let { try { it.getRemoteDevice(device.macAddress) } catch (_: Throwable) { null } }
+                        if (btDevice != null) {
+                            hidManager?.disconnect(btDevice)
+                        }
+                    }
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
             }
             com.remote.db.ConnectionType.ESP32_BLE_BRIDGE -> {
-                // Not supported
-                Result.success(Unit)
+                try {
+                    bleManager?.disconnect()
+                    bleManager?.close()
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
             }
             com.remote.db.ConnectionType.FLIPPER_ZERO_BRIDGE -> {
-                flipperBridge?.close()
-                Result.success(Unit)
+                try {
+                    flipperBridge?.close()
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
             }
             com.remote.db.ConnectionType.USB_IR_DONGLE -> {
                 usbCdcDriver?.close()
@@ -131,7 +151,26 @@ class ConnectionRouter(
                 }
                 Result.success(Unit)
             }
-            com.remote.db.ConnectionType.DIRECT_BT_HID,
+            com.remote.db.ConnectionType.DIRECT_BT_HID -> {
+                try {
+                    if (!device.macAddress.isNullOrBlank()) {
+                        @Suppress("DEPRECATION")
+                        val adapter = try { android.bluetooth.BluetoothAdapter.getDefaultAdapter() } catch (_: Throwable) { null }
+                        val btDevice = adapter?.let { try { it.getRemoteDevice(device.macAddress) } catch (_: Throwable) { null } }
+                        if (btDevice != null) {
+                            if (btDevice.bondState == android.bluetooth.BluetoothDevice.BOND_NONE) {
+                                hidManager?.pairDevice(btDevice)
+                            }
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                                hidManager?.connect(btDevice)
+                            }
+                        }
+                    }
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
+            }
             com.remote.db.ConnectionType.AUDIO_JACK_IR,
             com.remote.db.ConnectionType.INTERNAL_IR,
             com.remote.db.ConnectionType.USB_IR_DONGLE,
@@ -140,14 +179,35 @@ class ConnectionRouter(
                 Result.success(Unit)
             }
             com.remote.db.ConnectionType.ESP32_BLE_BRIDGE -> {
-                Result.success(Unit)
+                try {
+                    if (!device.macAddress.isNullOrBlank()) {
+                        @Suppress("DEPRECATION")
+                        val adapter = try { android.bluetooth.BluetoothAdapter.getDefaultAdapter() } catch (_: Throwable) { null }
+                        val btDevice = adapter?.let { try { it.getRemoteDevice(device.macAddress) } catch (_: Throwable) { null } }
+                        if (btDevice != null) {
+                            if (btDevice.bondState == android.bluetooth.BluetoothDevice.BOND_NONE) {
+                                bleManager?.pairDevice(btDevice)
+                            }
+                            bleManager?.connect(btDevice)
+                        }
+                    }
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
             }
             com.remote.db.ConnectionType.FLIPPER_ZERO_BRIDGE -> {
                 try {
-                    val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
-                    val btDevice = device.macAddress?.let { adapter?.getRemoteDevice(it) }
-                    if (btDevice != null) {
-                        flipperBridge?.connect(btDevice)
+                    if (!device.macAddress.isNullOrBlank()) {
+                        @Suppress("DEPRECATION")
+                        val adapter = try { android.bluetooth.BluetoothAdapter.getDefaultAdapter() } catch (_: Throwable) { null }
+                        val btDevice = adapter?.let { try { it.getRemoteDevice(device.macAddress) } catch (_: Throwable) { null } }
+                        if (btDevice != null) {
+                            if (btDevice.bondState == android.bluetooth.BluetoothDevice.BOND_NONE) {
+                                flipperBridge?.pairDevice(btDevice)
+                            }
+                            flipperBridge?.connect(btDevice)
+                        }
                     }
                     Result.success(Unit)
                 } catch (e: Exception) {

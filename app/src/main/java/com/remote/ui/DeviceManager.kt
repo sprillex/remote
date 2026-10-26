@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.remote.db.ConnectionType
 import com.remote.db.ProfileType
@@ -213,6 +214,24 @@ fun DeviceAddEditDialog(
 
     var connDropdownExpanded by remember { mutableStateOf(false) }
     var profileDropdownExpanded by remember { mutableStateOf(false) }
+    var pairedDevicesDropdownExpanded by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val isBluetoothType = connectionType == ConnectionType.DIRECT_BT_HID ||
+            connectionType == ConnectionType.ESP32_BLE_BRIDGE ||
+            connectionType == ConnectionType.FLIPPER_ZERO_BRIDGE
+
+    val pairedDevices = remember(isBluetoothType) {
+        if (isBluetoothType) {
+            try {
+                @Suppress("DEPRECATION")
+                val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+                adapter?.bondedDevices?.toList() ?: emptyList()
+            } catch (_: Exception) {
+                emptyList()
+            }
+        } else emptyList()
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -291,6 +310,58 @@ fun DeviceAddEditDialog(
                                 }
                             )
                         }
+                    }
+                }
+
+                if (isBluetoothType) {
+                    if (pairedDevices.isNotEmpty()) {
+                        ExposedDropdownMenuBox(
+                            expanded = pairedDevicesDropdownExpanded,
+                            onExpandedChange = { pairedDevicesDropdownExpanded = it }
+                        ) {
+                            OutlinedTextField(
+                                value = pairedDevices.find { it.address == macAddress }?.let { "${it.name ?: "Unknown"} (${it.address})" } ?: macAddress.ifEmpty { "Select Paired Device" },
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Paired Bluetooth Devices") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = pairedDevicesDropdownExpanded) },
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .fillMaxWidth()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = pairedDevicesDropdownExpanded,
+                                onDismissRequest = { pairedDevicesDropdownExpanded = false }
+                            ) {
+                                pairedDevices.forEach { dev ->
+                                    val displayName = try { dev.name ?: dev.address } catch (_: SecurityException) { dev.address }
+                                    DropdownMenuItem(
+                                        text = { Text("$displayName (${dev.address})") },
+                                        onClick = {
+                                            macAddress = dev.address
+                                            if (name.isBlank()) {
+                                                name = displayName
+                                            }
+                                            pairedDevicesDropdownExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            try {
+                                val intent = android.content.Intent(android.bluetooth.BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+                                    putExtra(android.bluetooth.BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
+                                }
+                                context.startActivity(intent)
+                            } catch (_: Exception) {}
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Make Phone Discoverable for Pairing")
                     }
                 }
 
