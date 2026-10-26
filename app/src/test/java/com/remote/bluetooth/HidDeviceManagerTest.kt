@@ -101,4 +101,20 @@ class HidDeviceManagerTest {
         manager.registerHidApp()
         assertTrue("registerHidApp should complete gracefully without throwing", true)
     }
+
+    @Test
+    fun testSendKeyWithoutTargetDeviceReturnsFalse() {
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext)
+        val result = manager.sendKey(0x04, 0x00)
+        org.junit.Assert.assertFalse("sendKey without target device should return false", result)
+    }
+
+    @Test
+    fun testSendCharWithoutTargetDeviceReturnsFalse() {
+        val mockContext = android.content.ContextWrapper(null)
+        val manager = HidDeviceManager(mockContext)
+        val result = manager.sendChar('a')
+        org.junit.Assert.assertFalse("sendChar without target device should return false", result)
+    }
 }

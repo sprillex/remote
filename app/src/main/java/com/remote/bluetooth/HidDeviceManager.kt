@@ -154,6 +154,7 @@ class HidDeviceManager(
     }
 
     private var hidDevice: BluetoothHidDevice? = null
+    private var connectedDevice: BluetoothDevice? = null
 
     val sdpSettings by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -178,9 +179,43 @@ class HidDeviceManager(
                 override fun onConnectionStateChanged(device: BluetoothDevice, state: Int) {
                     super.onConnectionStateChanged(device, state)
                     Log.d(TAG, "onConnectionStateChanged: device=${device.address}, state=$state")
+                    if (state == android.bluetooth.BluetoothProfile.STATE_CONNECTED) {
+                        connectedDevice = device
+                    } else if (state == android.bluetooth.BluetoothProfile.STATE_DISCONNECTED) {
+                        if (connectedDevice?.address == device.address) {
+                            connectedDevice = null
+                        }
+                    }
                 }
             }
         } else null
+    }
+
+    fun getTargetDevice(): BluetoothDevice? {
+        if (connectedDevice != null) return connectedDevice
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && hasPermission()) {
+            try {
+                return hidDevice?.getDevicesMatchingConnectionStates(intArrayOf(android.bluetooth.BluetoothProfile.STATE_CONNECTED))?.firstOrNull()
+            } catch (_: Exception) {} catch (_: Throwable) {}
+        }
+        return null
+    }
+
+    fun sendKey(usageId: Byte, modifier: Byte = 0): Boolean {
+        val device = getTargetDevice() ?: return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val keyDown = buildKeyboardReport(modifier, listOf(usageId))
+            val sentDown = sendReport(device, 0, keyDown)
+            val keyUp = buildKeyboardReport(0, emptyList())
+            val sentUp = sendReport(device, 0, keyUp)
+            return sentDown && sentUp
+        }
+        return false
+    }
+
+    fun sendChar(char: Char): Boolean {
+        val report = KeyTranslator.translate(char) ?: return false
+        return sendKey(report.usageId, report.modifier)
     }
 
     fun registerHidApp() {
