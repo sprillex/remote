@@ -158,15 +158,13 @@ class BleGattManager(private val context: Context? = null) {
             characteristic: BluetoothGattCharacteristic
         ) {
             super.onCharacteristicChanged(gatt, characteristic)
-            if (characteristic.uuid == NUS_TX_CHARACTERISTIC_UUID) {
-                try {
-                    val value = characteristic.value
-                    if (value != null) {
-                        _incomingData.tryEmit(value)
-                    }
-                } catch (e: Exception) {
-                    logE("Exception on onCharacteristicChanged", e)
+            try {
+                val value = characteristic.value
+                if (value != null) {
+                    this.onCharacteristicChanged(gatt, characteristic, value)
                 }
+            } catch (e: Exception) {
+                logE("Exception on onCharacteristicChanged fallback", e)
             }
         }
     }

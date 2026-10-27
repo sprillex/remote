@@ -50,7 +50,7 @@
 - **Core Technical Requirements:** Catching generic exceptions (`try { performSsdpDiscovery() } catch (e: Exception) {}`) without logging during SSDP fallback sweeps. Trigger condition: Network failures during SSDP are silently ignored. Proposed fix: Log the exception to aid in debugging connection issues.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 11.0: Fix Deprecated API Usage [EASY]
+### Task 11.0: Fix Deprecated API Usage [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/bluetooth/BleGattManager.kt`
 - **Core Technical Requirements:** Accessing `characteristic.value` directly is deprecated in Android 13 (API 33). Linter warning. Remediation: Override the new `onCharacteristicChanged(BluetoothGatt, BluetoothGattCharacteristic, ByteArray)` callback signature introduced in TIRAMISU.
 - **Verification Criteria:** `./gradlew test`
