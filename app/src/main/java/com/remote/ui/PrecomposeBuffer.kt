@@ -42,6 +42,7 @@ data class InjectionResult(
 )
 
 object PrecomposeBufferInjector {
+    private val keyUpReport = ByteArray(8)
 
     suspend fun injectText(
         text: String,
@@ -53,6 +54,9 @@ object PrecomposeBufferInjector {
         var skipped = 0
         val total = text.length
 
+        // Reusable array for key down to prevent hot-loop allocations
+        val keyDownReport = ByteArray(8)
+
         for (i in text.indices) {
             if (!coroutineContext.isActive) {
                 break
@@ -63,10 +67,8 @@ object PrecomposeBufferInjector {
 
             if (reportInfo != null) {
                 // Key down
-                val keyDownReport = HidDeviceManager.buildKeyboardReport(
-                    reportInfo.modifier,
-                    listOf(reportInfo.usageId)
-                )
+                keyDownReport[0] = reportInfo.modifier
+                keyDownReport[2] = reportInfo.usageId
                 sendReport(keyDownReport)
 
                 if (interKeyDelayMs > 0) {
@@ -74,12 +76,14 @@ object PrecomposeBufferInjector {
                 }
 
                 // Key up
-                val keyUpReport = HidDeviceManager.buildKeyboardReport(0, emptyList())
                 sendReport(keyUpReport)
 
                 if (interKeyDelayMs > 0) {
                     delay(interKeyDelayMs)
                 }
+
+                // Clear the used usageId for the next character
+                keyDownReport[2] = 0
 
                 injected++
             } else {

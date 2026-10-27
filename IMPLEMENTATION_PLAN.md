@@ -40,7 +40,7 @@
 - **Core Technical Requirements:** `new std::string(rxValue)` inside `onWrite` callback allocates heap memory dynamically in an ISR/BLE task context. Description: Unbounded heap allocations in tasks can cause memory fragmentation and exhaustion. Remediation: Use a static buffer or pre-allocated FreeRTOS queue for `HidReport` objects instead of dynamic strings.
 - **Verification Criteria:** `cd firmware && pio test --without-uploading`
 
-### Task 9.0: Fix Hot-Loop Allocations in Key Injection [EASY]
+### Task 9.0: Fix Hot-Loop Allocations in Key Injection [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/ui/PrecomposeBuffer.kt`
 - **Core Technical Requirements:** `HidDeviceManager.buildKeyboardReport` and `emptyList()` create new objects on every keystroke during `injectText`. Allocation hot-loop description: Constant GC pressure during large payload injection. Remediation: Cache and reuse a static `keyUpReport` byte array and reuse mutable byte arrays for key down.
 - **Verification Criteria:** `./gradlew test`

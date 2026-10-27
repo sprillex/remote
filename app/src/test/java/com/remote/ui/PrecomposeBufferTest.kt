@@ -20,7 +20,8 @@ class PrecomposeBufferTest {
             text = text,
             interKeyDelayMs = 1L,
             sendReport = { report ->
-                reports.add(report)
+                // Must clone since the array is reused
+                reports.add(report.clone())
                 true
             },
             onProgress = { current, total ->
@@ -67,7 +68,7 @@ class PrecomposeBufferTest {
             text = text,
             interKeyDelayMs = 0L,
             sendReport = { report ->
-                reports.add(report)
+                reports.add(report.clone())
                 true
             }
         )
@@ -90,7 +91,7 @@ class PrecomposeBufferTest {
                 text = text,
                 interKeyDelayMs = 50L,
                 sendReport = { report ->
-                    reports.add(report)
+                    reports.add(report.clone())
                     true
                 }
             )
