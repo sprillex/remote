@@ -154,35 +154,35 @@ data class ButtonMappingEntity(
 ## 5. Phased Engineering Roadmap
 
 ```
-├── Phase 1: Android Core Bluetooth Engine & Text Pipeline (High Priority) [Audit Complete - Unstarted]
+├── Phase 1: Android Core Bluetooth Engine & Text Pipeline (High Priority) [Audit Complete - Resolved]
 │   ├── [x] Task 1.1: Initialize Android Studio project (Kotlin, Coroutines, Jetpack Compose, Dark Theme).
 │   ├── [x] Task 1.2: Implement BluetoothHidDevice profile registration with SDP boot keyboard records.
 │   ├── [x] Task 1.3: Build UTF-8 character to standard USB HID Usage Tables (Page 0x07) translation engine.
 │   ├── [x] Task 1.4: Implement precompose buffer UI and chunked text injection pipeline with adjustable inter-key delay.
 │   └── [x] Task 1.5: Implement BLE GATT Client connection manager using Nordic UART Service (NUS) protocol.
 │
-├── Phase 2: ESP32-S2/S3 Dongle Firmware (High Priority) [Audit Complete - In Progress]
+├── Phase 2: ESP32-S2/S3 Dongle Firmware (High Priority) [Audit Complete - Resolved]
 │   ├── [x] Task 2.1: Bootstrap PlatformIO project with native TinyUSB stack for ESP32-S2/S3.
 │   ├── [x] Task 2.2: Implement USB HID Keyboard descriptor and report endpoints on native D-/D+ GPIOs.
 │   ├── [x] Task 2.3: Implement NimBLE GATT NUS service receiving binary command frames.
 │   ├── [x] Task 2.4: Implement thread-safe FIFO ring buffer bridging BLE payloads to USB HID endpoints.
 │   └── [x] Task 2.5: Add hardware pairing bond security and static PIN authentication.
 │
-├── Phase 3: Database, Multi-Profile Engine & UI Routing (High Priority) [Audit Complete - In Progress]
+├── Phase 3: Database, Multi-Profile Engine & UI Routing (High Priority) [Audit Complete - Resolved]
 │   ├── [x] Task 3.1: Construct Room entities (TargetDeviceEntity, ButtonMappingEntity) and DAOs.
 │   ├── [x] Task 3.2: Implement single-link DeviceConnectionRouter using Disconnect-Before-Connect lifecycle.
 │   ├── [x] Task 3.3: Implement DeviceSetupGuideRegistry providing contextual onboarding instructions.
 │   ├── [x] Task 3.4: Build dynamic Compose UI surfaces (Full Keyboard, D-Pad TV Remote, Media Bar, Macro Pad).
 │   └── [x] Task 3.5: Build Device Manager screen for adding, editing, reordering, and deleting profiles.
 │
-├── Phase 4: Network Transport Extensions (Low Priority) [Audit Complete - Unstarted]
+├── Phase 4: Network Transport Extensions (Low Priority) [Audit Complete - Resolved]
 │   ├── [x] Task 4.1: Implement Roku ECP client over OkHttp3 (Port 8060 keypress, power, and Lit_ endpoints).
 │   ├── [x] Task 4.2: Implement SSDP UDP multicast discovery (ST: roku:ecp) with subnet sweep fallback.
 │   ├── [x] Task 4.3: Implement SSHJ client supporting Ed25519 key generation and known_hosts validation.
 │   ├── [x] Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming.
 │   └── [x] Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
 │
-└── Phase 5: Infrared Subsystem Extensions (Low Priority) [Audit Complete - Unstarted]
+└── Phase 5: Infrared Subsystem Extensions (Low Priority) [Audit Complete - In Progress]
     ├── [ ] Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library.
     ├── [x] Task 5.2: Update BLE frame specification to handle IR protocol opcodes (NEC, Sony, RC5, Raw).
     ├── [x] Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters.
