@@ -1,5 +1,6 @@
 package com.remote.network
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -13,7 +14,6 @@ import java.net.SocketTimeoutException
 import java.nio.channels.SocketChannel
 import java.util.regex.Pattern
 import kotlinx.coroutines.runInterruptible
-import android.util.Log
 
 class SsdpDiscovery(
     private val ssdpTimeoutMs: Int = 3000,
@@ -42,12 +42,7 @@ class SsdpDiscovery(
             val ssdpResult = performSsdpDiscovery()
             devices.addAll(ssdpResult)
         } catch (e: Exception) {
-            try {
-                Log.e("SsdpDiscovery", "SSDP discovery failed, moving to fallback", e)
-            } catch (mockError: Throwable) {
-                println("SsdpDiscovery Network exception: ${e.message}")
-                e.printStackTrace()
-            }
+            Log.e("SsdpDiscovery", "SSDP Discovery failed", e)
         }
 
         // 2. Fallback to subnet sweep if SSDP found nothing
