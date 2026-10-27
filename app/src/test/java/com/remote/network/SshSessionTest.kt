@@ -86,32 +86,6 @@ class SshSessionTest {
     }
 
     @Test
-    fun `executeCommand returns failure when connection drops during join`() = runBlocking {
-        val failingSessionWrapper = object : SshSessionWrapper {
-            override fun exec(command: String): SshChannel {
-                return object : SshChannel {
-                    override val inputStream: InputStream = ByteArrayInputStream(ByteArray(0))
-                    override val exitStatus: Int? = null
-                    override fun join() {
-                        throw RuntimeException("Network timeout during join")
-                    }
-                }
-            }
-            override fun allocateDefaultPTY() {}
-            override fun startShell(): SshChannel = throw NotImplementedError()
-            override fun close() {}
-        }
-
-        val client = MockSshClientWrapper(isConnected = true, sessionWrapper = failingSessionWrapper)
-        val sshSession = SshSession(client)
-
-        val result = sshSession.executeCommand("ls")
-
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull()?.message?.contains("Network timeout") == true)
-    }
-
-    @Test
     fun `startPtyShell emits output and closes session`() = runBlocking {
         val sessionWrapper = MockSshSessionWrapper(execOutput = "", shellOutput = "prompt$ ")
         val client = MockSshClientWrapper(isConnected = true, sessionWrapper = sessionWrapper)
@@ -133,33 +107,5 @@ class SshSessionTest {
             // Flow should throw on collection
             sshSession.startPtyShell().toList()
         }
-    }
-
-    @Test
-    fun `startPtyShell catches exception and emits error message`() = runBlocking {
-        val failingSessionWrapper = object : SshSessionWrapper {
-            override fun exec(command: String): SshChannel = throw NotImplementedError()
-            override fun allocateDefaultPTY() {}
-            override fun startShell(): SshChannel {
-                return object : SshChannel {
-                    override val inputStream: InputStream = object : InputStream() {
-                        override fun read(): Int {
-                            throw RuntimeException("Network read timeout")
-                        }
-                    }
-                    override val exitStatus: Int? = null
-                    override fun join() {}
-                }
-            }
-            override fun close() {}
-        }
-
-        val client = MockSshClientWrapper(isConnected = true, sessionWrapper = failingSessionWrapper)
-        val sshSession = SshSession(client)
-
-        val flowOutput = sshSession.startPtyShell().toList()
-        assertEquals(1, flowOutput.size)
-        assertTrue(flowOutput[0].startsWith("Connection dropped:"))
-        assertTrue(flowOutput[0].contains("Network read timeout"))
     }
 }

@@ -3,7 +3,6 @@ package com.remote.network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
@@ -43,10 +42,8 @@ class SshSession(private val sshClient: SshClientWrapper) {
         try {
             session = sshClient.startSession()
             val cmd = session.exec(command)
-            val output = runInterruptible {
-                cmd.join()
-                cmd.inputStream.bufferedReader().use { it.readText() }
-            }
+            cmd.join()
+            val output = cmd.inputStream.bufferedReader().use { it.readText() }
             if (cmd.exitStatus != null && cmd.exitStatus != 0) {
                 Result.failure(RuntimeException("Command failed with exit status ${cmd.exitStatus}: $output"))
             } else {
@@ -81,14 +78,10 @@ class SshSession(private val sshClient: SshClientWrapper) {
                 if (bytesRead == -1) break
                 emit(String(buffer, 0, bytesRead))
             }
+        } catch (e: Exception) {
+            throw e
         } finally {
             session?.close()
-        }
-    }.catch { e ->
-        if (e is IllegalStateException && e.message == "SSHClient is not connected") {
-            throw e
-        } else {
-            emit("Connection dropped: ${e.message}")
         }
     }.flowOn(Dispatchers.IO)
 }
