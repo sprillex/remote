@@ -35,7 +35,7 @@
 - **Core Technical Requirements:** Creating a new `HttpURLConnection` for each individual keystroke in `sendTextString` creates an allocation hot-loop and resource exhaustion. Description: Connection setup overhead limits injection speed and wastes memory. Remediation: Migrate to a connection-pooled HTTP client like OkHttp for keep-alive connections.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 8.0: Fix Dynamic Allocation in BLE Interrupt [HARD]
+### Task 8.0: Fix Dynamic Allocation in BLE Interrupt [RESOLVED]
 - **Target Files:** `firmware/src/ble_nus.cpp`
 - **Core Technical Requirements:** `new std::string(rxValue)` inside `onWrite` callback allocates heap memory dynamically in an ISR/BLE task context. Description: Unbounded heap allocations in tasks can cause memory fragmentation and exhaustion. Remediation: Use a static buffer or pre-allocated FreeRTOS queue for `HidReport` objects instead of dynamic strings.
 - **Verification Criteria:** `cd firmware && pio test --without-uploading`
