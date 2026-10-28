@@ -183,7 +183,7 @@ data class ButtonMappingEntity(
 │   └── [x] Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
 │
 └── Phase 5: Infrared Subsystem Extensions (Low Priority) [Audit Complete - In Progress]
-    ├── [ ] Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library.
+    ├── [x] Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library.
     ├── [x] Task 5.2: Update BLE frame specification to handle IR protocol opcodes (NEC, Sony, RC5, Raw).
     ├── [x] Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters.
     ├── [x] Task 5.4: Build AudioTrack 19kHz dual-channel phase-inverted carrier generator for 3.5mm adapters.

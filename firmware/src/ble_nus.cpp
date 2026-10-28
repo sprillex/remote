@@ -28,7 +28,7 @@ class MyServerCallbacks: public NimBLEServerCallbacks {
 
 class MyCallbacks: public NimBLECharacteristicCallbacks {
     void onWrite(NimBLECharacteristic *pCharacteristic) {
-      std::string rxValue = pCharacteristic->getValue();
+      NimBLEAttValue rxValue = pCharacteristic->getValue();
 
       if (rxValue.length() > 0) {
         uint8_t opcode = rxValue[0];

@@ -1,6 +1,6 @@
 # Implementation Plan
 
-### Task 1.0: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library. [HARD]
+### Task 1.0: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library. [RESOLVED]
 - **Target Files:** `firmware/src/ir_tx.cpp`
 - **Core Technical Requirements:** Use IRremoteESP8266 library to implement ESP32 RMT hardware infrared driver.
 - **Verification Criteria:** `cd firmware && pio test --without-uploading`
@@ -35,7 +35,7 @@
 - **Core Technical Requirements:** Creating a new `HttpURLConnection` for each individual keystroke in `sendTextString` creates an allocation hot-loop and resource exhaustion. Description: Connection setup overhead limits injection speed and wastes memory. Remediation: Migrate to a connection-pooled HTTP client like OkHttp for keep-alive connections.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 8.0: Fix Dynamic Allocation in BLE Interrupt [HARD]
+### Task 8.0: Fix Dynamic Allocation in BLE Interrupt [RESOLVED]
 - **Target Files:** `firmware/src/ble_nus.cpp`
 - **Core Technical Requirements:** `new std::string(rxValue)` inside `onWrite` callback allocates heap memory dynamically in an ISR/BLE task context. Description: Unbounded heap allocations in tasks can cause memory fragmentation and exhaustion. Remediation: Use a static buffer or pre-allocated FreeRTOS queue for `HidReport` objects instead of dynamic strings.
 - **Verification Criteria:** `cd firmware && pio test --without-uploading`
@@ -45,7 +45,7 @@
 - **Core Technical Requirements:** `HidDeviceManager.buildKeyboardReport` and `emptyList()` create new objects on every keystroke during `injectText`. Allocation hot-loop description: Constant GC pressure during large payload injection. Remediation: Cache and reuse a static `keyUpReport` byte array and reuse mutable byte arrays for key down.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 10.0: Fix Empty Catch Blocks in Discovery [EASY]
+### Task 10.0: Fix Empty Catch Blocks in Discovery [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/network/SsdpDiscovery.kt`
 - **Core Technical Requirements:** Catching generic exceptions (`try { performSsdpDiscovery() } catch (e: Exception) {}`) without logging during SSDP fallback sweeps. Trigger condition: Network failures during SSDP are silently ignored. Proposed fix: Log the exception to aid in debugging connection issues.
 - **Verification Criteria:** `./gradlew test`

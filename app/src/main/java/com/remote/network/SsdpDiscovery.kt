@@ -1,5 +1,6 @@
 package com.remote.network
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -41,7 +42,7 @@ class SsdpDiscovery(
             val ssdpResult = performSsdpDiscovery()
             devices.addAll(ssdpResult)
         } catch (e: Exception) {
-            // Ignore exceptions during SSDP, move to fallback
+            Log.e("SsdpDiscovery", "SSDP Discovery failed", e)
         }
 
         // 2. Fallback to subnet sweep if SSDP found nothing
