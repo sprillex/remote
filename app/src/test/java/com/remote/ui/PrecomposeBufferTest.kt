@@ -20,7 +20,7 @@ class PrecomposeBufferTest {
             text = text,
             interKeyDelayMs = 1L,
             sendReport = { report ->
-                reports.add(report)
+                reports.add(report.copyOf())
                 true
             },
             onProgress = { current, total ->
@@ -67,7 +67,7 @@ class PrecomposeBufferTest {
             text = text,
             interKeyDelayMs = 0L,
             sendReport = { report ->
-                reports.add(report)
+                reports.add(report.copyOf())
                 true
             }
         )
@@ -90,7 +90,7 @@ class PrecomposeBufferTest {
                 text = text,
                 interKeyDelayMs = 50L,
                 sendReport = { report ->
-                    reports.add(report)
+                    reports.add(report.copyOf())
                     true
                 }
             )
