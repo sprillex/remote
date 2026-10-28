@@ -55,7 +55,7 @@
 - **Core Technical Requirements:** Accessing `characteristic.value` directly is deprecated in Android 13 (API 33). Linter warning. Remediation: Override the new `onCharacteristicChanged(BluetoothGatt, BluetoothGattCharacteristic, ByteArray)` callback signature introduced in TIRAMISU.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 12.0: Fix Incomplete Edge Case Handling [EASY]
+### Task 12.0: Fix Incomplete Edge Case Handling [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/bluetooth/KeyTranslator.kt`
 - **Core Technical Requirements:** Unsupported characters map to `null`, which are silently skipped in `PrecomposeBufferInjector`. Idiom deviation. Remediation: Fallback to an alternative input method or log explicit warnings for skipped inputs.
 - **Verification Criteria:** `./gradlew test`

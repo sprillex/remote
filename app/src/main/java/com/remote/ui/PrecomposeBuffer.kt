@@ -83,6 +83,7 @@ object PrecomposeBufferInjector {
 
                 injected++
             } else {
+                android.util.Log.w("PrecomposeBufferInjector", "Unsupported character skipped: '$char'")
                 skipped++
             }
 
