@@ -82,6 +82,7 @@ class ConnectionRouter(
         return when (device.connectionType) {
             com.remote.db.ConnectionType.SSH_NETWORK -> {
                 try {
+                    (activeSshClient as? com.remote.network.SshClient)?.disconnect()
                     activeSshClient = null
                     Result.success(Unit)
                 } catch (e: Exception) {
@@ -138,6 +139,19 @@ class ConnectionRouter(
         return when (device.connectionType) {
             com.remote.db.ConnectionType.SSH_NETWORK -> {
                 if (activeSshClient != null) {
+                    try {
+                        if (activeSshClient is com.remote.network.SshClient) {
+                            device.hostAddress?.let { host ->
+                                (activeSshClient as com.remote.network.SshClient).connect(
+                                    host = host,
+                                    knownHostsPath = null,
+                                    privateKeyPath = null
+                                )
+                            }
+                        }
+                    } catch (e: Exception) {
+                        return Result.failure(e)
+                    }
                     Result.success(Unit)
                 } else {
                     Result.failure(IllegalStateException("No SSH client configured"))

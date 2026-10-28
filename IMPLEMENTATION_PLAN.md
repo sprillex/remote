@@ -5,12 +5,12 @@
 - **Core Technical Requirements:** Use IRremoteESP8266 library to implement ESP32 RMT hardware infrared driver.
 - **Verification Criteria:** `cd firmware && pio test --without-uploading`
 
-### Task 2.0: Fix Swallowed Network Exceptions [EASY]
+### Task 2.0: Fix Swallowed Network Exceptions [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/network/RokuClient.kt`
 - **Core Technical Requirements:** Catching generic `Exception` without logging hides critical connection failures (e.g., timeouts, unreachable hosts). Failure state: Silent failure of remote commands. Proposed fix: Log exception details and return a distinct error type (Result/Either).
 - **Verification Criteria:** `./gradlew test`
 
-### Task 3.0: Fix Unused Connection Parameters [EASY]
+### Task 3.0: Fix Unused Connection Parameters [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/router/ConnectionRouter.kt`
 - **Core Technical Requirements:** The `device` parameter in `disconnectInternal` and `connectInternal` is unused, meaning the router does not actually delegate properly to protocol managers. Failure state: Stale or incorrect connections during routing. Proposed fix: Pass the device configuration correctly to the protocol handlers.
 - **Verification Criteria:** `./gradlew test`

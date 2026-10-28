@@ -211,7 +211,7 @@ data class ButtonMappingEntity(
 
 ### Milestone 3: Profile State Machine
 
-**Status:** [Audit Complete - In Progress]
+**Status:** [Audit Complete - Resolved]
 
 - [x] Switching from Profile A (Direct BT) to Profile B (ESP32) cleanly severs Link A before initializing Link B.
 - [ ] No residual Bluetooth locks or background connection conflicts occur when switching profiles rapidly.
