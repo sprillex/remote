@@ -15,7 +15,7 @@
 - **Core Technical Requirements:** The `device` parameter in `disconnectInternal` and `connectInternal` is unused, meaning the router does not actually delegate properly to protocol managers. Failure state: Stale or incorrect connections during routing. Proposed fix: Pass the device configuration correctly to the protocol handlers.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 4.0: Fix Unhandled SSH Flow Exceptions [EASY]
+### Task 4.0: Fix Unhandled SSH Flow Exceptions [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/network/SshSession.kt`
 - **Core Technical Requirements:** `executeCommand` and `startPtyShell` flows do not comprehensively handle connection drops midway, which could result in dangling Coroutine scopes. Trigger condition: Dropped network connection during SSH shell. Proposed fix: Implement robust exception catching and flow `.catch` operators.
 - **Verification Criteria:** `./gradlew test`
