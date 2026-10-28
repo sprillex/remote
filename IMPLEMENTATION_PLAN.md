@@ -1,6 +1,6 @@
 # Implementation Plan
 
-### Task 1.0: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library. [HARD]
+### Task 1.0: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library. [RESOLVED]
 - **Target Files:** `firmware/src/ir_tx.cpp`
 - **Core Technical Requirements:** Use IRremoteESP8266 library to implement ESP32 RMT hardware infrared driver.
 - **Verification Criteria:** `cd firmware && pio test --without-uploading`
