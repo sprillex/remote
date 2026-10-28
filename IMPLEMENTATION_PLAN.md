@@ -15,7 +15,7 @@
 - **Core Technical Requirements:** The `device` parameter in `disconnectInternal` and `connectInternal` is unused, meaning the router does not actually delegate properly to protocol managers. Failure state: Stale or incorrect connections during routing. Proposed fix: Pass the device configuration correctly to the protocol handlers.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 4.0: Fix Unhandled SSH Flow Exceptions [EASY]
+### Task 4.0: Fix Unhandled SSH Flow Exceptions [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/network/SshSession.kt`
 - **Core Technical Requirements:** `executeCommand` and `startPtyShell` flows do not comprehensively handle connection drops midway, which could result in dangling Coroutine scopes. Trigger condition: Dropped network connection during SSH shell. Proposed fix: Implement robust exception catching and flow `.catch` operators.
 - **Verification Criteria:** `./gradlew test`
@@ -40,7 +40,7 @@
 - **Core Technical Requirements:** `new std::string(rxValue)` inside `onWrite` callback allocates heap memory dynamically in an ISR/BLE task context. Description: Unbounded heap allocations in tasks can cause memory fragmentation and exhaustion. Remediation: Use a static buffer or pre-allocated FreeRTOS queue for `HidReport` objects instead of dynamic strings.
 - **Verification Criteria:** `cd firmware && pio test --without-uploading`
 
-### Task 9.0: Fix Hot-Loop Allocations in Key Injection [EASY]
+### Task 9.0: Fix Hot-Loop Allocations in Key Injection [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/ui/PrecomposeBuffer.kt`
 - **Core Technical Requirements:** `HidDeviceManager.buildKeyboardReport` and `emptyList()` create new objects on every keystroke during `injectText`. Allocation hot-loop description: Constant GC pressure during large payload injection. Remediation: Cache and reuse a static `keyUpReport` byte array and reuse mutable byte arrays for key down.
 - **Verification Criteria:** `./gradlew test`
@@ -55,7 +55,7 @@
 - **Core Technical Requirements:** Accessing `characteristic.value` directly is deprecated in Android 13 (API 33). Linter warning. Remediation: Override the new `onCharacteristicChanged(BluetoothGatt, BluetoothGattCharacteristic, ByteArray)` callback signature introduced in TIRAMISU.
 - **Verification Criteria:** `./gradlew test`
 
-### Task 12.0: Fix Incomplete Edge Case Handling [EASY]
+### Task 12.0: Fix Incomplete Edge Case Handling [RESOLVED]
 - **Target Files:** `app/src/main/java/com/remote/bluetooth/KeyTranslator.kt`
 - **Core Technical Requirements:** Unsupported characters map to `null`, which are silently skipped in `PrecomposeBufferInjector`. Idiom deviation. Remediation: Fallback to an alternative input method or log explicit warnings for skipped inputs.
 - **Verification Criteria:** `./gradlew test`

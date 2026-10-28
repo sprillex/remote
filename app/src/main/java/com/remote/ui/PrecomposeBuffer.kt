@@ -53,6 +53,9 @@ object PrecomposeBufferInjector {
         var skipped = 0
         val total = text.length
 
+        val keyUpReport = HidDeviceManager.buildKeyboardReport(0, emptyList())
+        val keyDownReport = ByteArray(8)
+
         for (i in text.indices) {
             if (!coroutineContext.isActive) {
                 break
@@ -63,10 +66,8 @@ object PrecomposeBufferInjector {
 
             if (reportInfo != null) {
                 // Key down
-                val keyDownReport = HidDeviceManager.buildKeyboardReport(
-                    reportInfo.modifier,
-                    listOf(reportInfo.usageId)
-                )
+                keyDownReport[0] = reportInfo.modifier
+                keyDownReport[2] = reportInfo.usageId
                 sendReport(keyDownReport)
 
                 if (interKeyDelayMs > 0) {
@@ -74,7 +75,6 @@ object PrecomposeBufferInjector {
                 }
 
                 // Key up
-                val keyUpReport = HidDeviceManager.buildKeyboardReport(0, emptyList())
                 sendReport(keyUpReport)
 
                 if (interKeyDelayMs > 0) {
@@ -83,6 +83,7 @@ object PrecomposeBufferInjector {
 
                 injected++
             } else {
+                android.util.Log.w("PrecomposeBufferInjector", "Unsupported character skipped: '$char'")
                 skipped++
             }
 

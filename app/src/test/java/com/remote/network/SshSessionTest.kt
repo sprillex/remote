@@ -47,6 +47,14 @@ class SshSessionTest {
         override fun startSession(): SshSessionWrapper = sessionWrapper
     }
 
+    private class MockExceptionSshClientWrapper(
+        override val isConnected: Boolean = true
+    ) : SshClientWrapper {
+        override fun startSession(): SshSessionWrapper {
+            throw java.io.IOException("Network dropped")
+        }
+    }
+
     @Test
     fun `executeCommand returns success when connected and command succeeds`() = runBlocking {
         val sessionWrapper = MockSshSessionWrapper(execOutput = "hello world\n")
@@ -107,5 +115,27 @@ class SshSessionTest {
             // Flow should throw on collection
             sshSession.startPtyShell().toList()
         }
+    }
+
+    @Test
+    fun `executeCommand returns failure on exception`() = runBlocking {
+        val client = MockExceptionSshClientWrapper()
+        val sshSession = SshSession(client)
+
+        val result = sshSession.executeCommand("echo 'hello'")
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is java.io.IOException)
+        assertEquals("Network dropped", result.exceptionOrNull()?.message)
+    }
+
+    @Test
+    fun `startPtyShell emits error on exception`() = runBlocking {
+        val client = MockExceptionSshClientWrapper()
+        val sshSession = SshSession(client)
+
+        val flowOutput = sshSession.startPtyShell().toList()
+
+        assertEquals(listOf("Error: Network dropped"), flowOutput)
     }
 }
