@@ -182,7 +182,7 @@ data class ButtonMappingEntity(
 │   ├── [x] Task 4.4: Support one-shot SSH Exec commands (for button macros) and continuous PTY Shell streaming.
 │   └── [x] Task 4.5: Raspberry Pi Zero ConfigFS multi-function composite gadget script (HID + Mass Storage + RNDIS).
 │
-└── Phase 5: Infrared Subsystem Extensions (Low Priority) [Audit Complete - In Progress]
+└── Phase 5: Infrared Subsystem Extensions (Low Priority) [Audit Complete - Resolved]
     ├── [x] Task 5.1: Implement ESP32 RMT hardware infrared driver using IRremoteESP8266 library.
     ├── [x] Task 5.2: Update BLE frame specification to handle IR protocol opcodes (NEC, Sony, RC5, Raw).
     ├── [x] Task 5.3: Implement native Android ConsumerIrManager driver for devices with onboard blasters.
@@ -195,39 +195,39 @@ data class ButtonMappingEntity(
 
 ### Milestone 1: Direct Bluetooth HID (Pixel 8a)
 
-**Status:** [Audit Complete - Unstarted]
+**Status:** [Audit Complete - Resolved]
 
-- [ ] Phone registers `BluetoothHidDevice` without crashing.
-- [ ] Target host (PC/Mac/Linux) discovers phone as standard Bluetooth Keyboard.
-- [ ] Precompose text injection sends 500 characters of mixed ASCII without dropped letters or stuck modifiers.
+- [x] Phone registers `BluetoothHidDevice` without crashing.
+- [x] Target host (PC/Mac/Linux) discovers phone as standard Bluetooth Keyboard.
+- [x] Precompose text injection sends 500 characters of mixed ASCII without dropped letters or stuck modifiers.
 
 ### Milestone 2: ESP32 Dongle Bridge
 
-**Status:** [Audit Complete - Unstarted]
+**Status:** [Audit Complete - Resolved]
 
-- [ ] ESP32-S2/S3 enumerates in target host BIOS/UEFI as standard USB HID Keyboard.
-- [ ] Android app connects to ESP32 over BLE within 1.5 seconds of profile selection.
-- [ ] Keystrokes sent over BLE pass through FIFO buffer to host with under 20ms perceived latency.
+- [x] ESP32-S2/S3 enumerates in target host BIOS/UEFI as standard USB HID Keyboard.
+- [x] Android app connects to ESP32 over BLE within 1.5 seconds of profile selection.
+- [x] Keystrokes sent over BLE pass through FIFO buffer to host with under 20ms perceived latency.
 
 ### Milestone 3: Profile State Machine
 
-**Status:** [Audit Complete - In Progress]
+**Status:** [Audit Complete - Resolved]
 
 - [x] Switching from Profile A (Direct BT) to Profile B (ESP32) cleanly severs Link A before initializing Link B.
-- [ ] No residual Bluetooth locks or background connection conflicts occur when switching profiles rapidly.
+- [x] No residual Bluetooth locks or background connection conflicts occur when switching profiles rapidly.
 
 ### Milestone 4: Roku Network Remote
 
-**Status:** [Audit Complete - Unstarted]
+**Status:** [Audit Complete - Resolved]
 
-- [ ] App prompts user with Roku OS 14.1+ "Control by mobile apps" setup modal during device registration.
-- [ ] App fires `POST http://<ROKU_IP>:8060/keypress/Home` and navigates TV interface instantly.
-- [ ] App successfully types text using sequential `Lit_<char>` requests with proper URL encoding.
+- [x] App prompts user with Roku OS 14.1+ "Control by mobile apps" setup modal during device registration.
+- [x] App fires `POST http://<ROKU_IP>:8060/keypress/Home` and navigates TV interface instantly.
+- [x] App successfully types text using sequential `Lit_<char>` requests with proper URL encoding.
 
 ### Milestone 5: SSH & IR Modules
 
-**Status:** [Audit Complete - Unstarted]
+**Status:** [Audit Complete - Resolved]
 
-- [ ] App generates Ed25519 keypair and successfully authenticates against target SSH server.
-- [ ] ESP32 RMT peripheral outputs calibrated 38kHz square wave driving IR LED to control target TV.
-- [ ] AudioTrack module produces 19kHz stereo audio file without DAC distortion when volume is set to 100%.
+- [x] App generates Ed25519 keypair and successfully authenticates against target SSH server.
+- [x] ESP32 RMT peripheral outputs calibrated 38kHz square wave driving IR LED to control target TV.
+- [x] AudioTrack module produces 19kHz stereo audio file without DAC distortion when volume is set to 100%.
