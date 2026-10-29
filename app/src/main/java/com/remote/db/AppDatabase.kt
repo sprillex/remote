@@ -55,9 +55,53 @@ interface ButtonMappingDao {
     suspend fun deleteMappingsForDevice(deviceId: Long)
 }
 
+@Dao
+interface SshMacroDao {
+    @Query("SELECT * FROM ssh_macros ORDER BY id DESC")
+    fun getAllMacros(): Flow<List<SshMacroEntity>>
+
+    @Query("SELECT * FROM ssh_macros WHERE id = :id")
+    suspend fun getMacroById(id: Long): SshMacroEntity?
+
+    @Query("SELECT * FROM ssh_macros WHERE category = :category")
+    fun getMacrosByCategory(category: String): Flow<List<SshMacroEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMacro(macro: SshMacroEntity): Long
+
+    @Update
+    suspend fun updateMacro(macro: SshMacroEntity)
+
+    @Delete
+    suspend fun deleteMacro(macro: SshMacroEntity)
+}
+
+@Dao
+interface SshCredentialDao {
+    @Query("SELECT * FROM ssh_credentials ORDER BY id DESC")
+    fun getAllCredentials(): Flow<List<SshCredentialEntity>>
+
+    @Query("SELECT * FROM ssh_credentials WHERE id = :id")
+    suspend fun getCredentialById(id: Long): SshCredentialEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCredential(credential: SshCredentialEntity): Long
+
+    @Update
+    suspend fun updateCredential(credential: SshCredentialEntity)
+
+    @Delete
+    suspend fun deleteCredential(credential: SshCredentialEntity)
+}
+
 @Database(
-    entities = [TargetDeviceEntity::class, ButtonMappingEntity::class],
-    version = 1,
+    entities = [
+        TargetDeviceEntity::class,
+        ButtonMappingEntity::class,
+        SshMacroEntity::class,
+        SshCredentialEntity::class
+    ],
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -65,6 +109,8 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun targetDeviceDao(): TargetDeviceDao
     abstract fun buttonMappingDao(): ButtonMappingDao
+    abstract fun sshMacroDao(): SshMacroDao
+    abstract fun sshCredentialDao(): SshCredentialDao
 
     companion object {
         @Volatile

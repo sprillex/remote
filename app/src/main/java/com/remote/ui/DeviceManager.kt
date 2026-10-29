@@ -180,7 +180,7 @@ fun DeviceCard(
                 }
                 if (!device.hostAddress.isNullOrEmpty()) {
                     Text(
-                        text = "Host: ${device.hostAddress}:${device.port}",
+                        text = "Host: ${device.authUsername ?: "root"}@${device.hostAddress}:${device.port}",
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -210,6 +210,8 @@ fun DeviceAddEditDialog(
     var macAddress by remember { mutableStateOf(initialDevice?.macAddress ?: "") }
     var hostAddress by remember { mutableStateOf(initialDevice?.hostAddress ?: "") }
     var port by remember { mutableStateOf(initialDevice?.port?.toString() ?: "22") }
+    var authUsername by remember { mutableStateOf(initialDevice?.authUsername ?: "root") }
+    var authType by remember { mutableStateOf(initialDevice?.authType ?: "KEY") }
     var interKeyDelayMs by remember { mutableStateOf(initialDevice?.interKeyDelayMs?.toString() ?: "10") }
 
     var connDropdownExpanded by remember { mutableStateOf(false) }
@@ -275,6 +277,9 @@ fun DeviceAddEditDialog(
                                 text = { Text(type.name) },
                                 onClick = {
                                     connectionType = type
+                                    if (type == ConnectionType.SSH_NETWORK) {
+                                        profileType = ProfileType.SSH_SESSION
+                                    }
                                     connDropdownExpanded = false
                                 }
                             )
@@ -389,6 +394,24 @@ fun DeviceAddEditDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                if (connectionType == ConnectionType.SSH_NETWORK) {
+                    OutlinedTextField(
+                        value = authUsername,
+                        onValueChange = { authUsername = it },
+                        label = { Text("SSH Username") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = authType,
+                        onValueChange = { authType = it },
+                        label = { Text("SSH Auth Type (KEY / PASSWORD)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
                 OutlinedTextField(
                     value = interKeyDelayMs,
                     onValueChange = { interKeyDelayMs = it },
@@ -410,6 +433,8 @@ fun DeviceAddEditDialog(
                         macAddress = macAddress.ifBlank { null },
                         hostAddress = hostAddress.ifBlank { null },
                         port = port.toIntOrNull() ?: 22,
+                        authUsername = authUsername.ifBlank { "root" },
+                        authType = authType.ifBlank { "KEY" },
                         interKeyDelayMs = interKeyDelayMs.toIntOrNull() ?: 10
                     )
                     onSave(device)

@@ -1,28 +1,32 @@
 package com.remote.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.remote.db.ProfileType
+import com.remote.db.SshMacroEntity
+import com.remote.network.ExecutionMode
+import com.remote.network.MultiLineStager
+import com.remote.network.RawEscapeSequenceInjector
 
 @Composable
 fun DeviceSurface(
@@ -38,7 +42,7 @@ fun DeviceSurface(
         ProfileType.MEDIA_CONTROLLER -> MediaBarSurface(onSendMediaKey)
         ProfileType.PRESENTATION_CLICKER -> PresentationClickerSurface(onSendKey)
         ProfileType.TERMINAL_MACRO -> MacroPadSurface(onSendKey)
-        ProfileType.SSH_SESSION -> MacroPadSurface(onSendKey)
+        ProfileType.SSH_SESSION -> SshExtendedTerminalSurface(onSendText = onSendText)
         ProfileType.ANDROID_DEVICE -> AndroidDeviceSurface(onSendKey, onSendMediaKey, onSendText)
     }
 }
@@ -214,6 +218,387 @@ fun FullKeyboardSurface(
             KeyButton(text = "▶", modifier = Modifier.weight(1f)) { onSendKey(0x4F, 0) }
         }
     }
+}
+
+@Composable
+fun SshExtendedTerminalSurface(
+    onSendText: (String) -> Unit = {},
+    onSendFormattedCommand: (command: String, mode: ExecutionMode) -> Unit = { cmd, _ -> onSendText(cmd) }
+) {
+    var executionMode by remember { mutableStateOf(ExecutionMode.BUFFERED_EXEC) }
+    var singleLineCommand by remember { mutableStateOf("") }
+    var hexInput by remember { mutableStateOf("") }
+    var stagedScript by remember { mutableStateOf("echo 'Target: {{TARGET_IP}} Interface: {{INTERFACE}}'") }
+    var parameterBindings by remember { mutableStateOf(mutableMapOf("TARGET_IP" to "192.168.1.1", "INTERFACE" to "eth0")) }
+
+    var showConfirmationDialog by remember { mutableStateOf(false) }
+    var pendingMacro by remember { mutableStateOf<SshMacroEntity?>(null) }
+
+    var showMacroAddEditDialog by remember { mutableStateOf(false) }
+    var editingMacro by remember { mutableStateOf<SshMacroEntity?>(null) }
+
+    val stager = remember { MultiLineStager() }
+    val extractedTokens = remember(stagedScript) { stager.extractTokens(stagedScript) }
+
+    val macrosList = remember {
+        mutableStateListOf(
+            SshMacroEntity(id = 1, name = "Check Status", command = "systemctl status sshd", category = "prod", tags = "diagnostics"),
+            SshMacroEntity(id = 2, name = "Reboot Target", command = "reboot", category = "prod", tags = "maintenance", requireConfirmation = true),
+            SshMacroEntity(id = 3, name = "Disk Space", command = "df -h", category = "lab", tags = "diagnostics")
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("SSH Terminal & Execution Modes", style = MaterialTheme.typography.titleMedium)
+
+        // Mode Selector Toggle
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Mode: ${if (executionMode == ExecutionMode.INTERACTIVE_PTY) "Interactive PTY" else "Buffered Exec"}")
+            Row {
+                FilterChip(
+                    selected = executionMode == ExecutionMode.BUFFERED_EXEC,
+                    onClick = { executionMode = ExecutionMode.BUFFERED_EXEC },
+                    label = { Text("Exec") }
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                FilterChip(
+                    selected = executionMode == ExecutionMode.INTERACTIVE_PTY,
+                    onClick = { executionMode = ExecutionMode.INTERACTIVE_PTY },
+                    label = { Text("PTY") }
+                )
+            }
+        }
+
+        // Soft Modifier Keys Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            KeyButton(text = "Ctrl+C", modifier = Modifier.weight(1f)) { onSendFormattedCommand(RawEscapeSequenceInjector.CTRL_C, executionMode) }
+            KeyButton(text = "Ctrl+Z", modifier = Modifier.weight(1f)) { onSendFormattedCommand(RawEscapeSequenceInjector.CTRL_Z, executionMode) }
+            KeyButton(text = "Ctrl+\\", modifier = Modifier.weight(1f)) { onSendFormattedCommand(RawEscapeSequenceInjector.CTRL_BACKSLASH, executionMode) }
+            KeyButton(text = "ESC", modifier = Modifier.weight(1f)) { onSendFormattedCommand(RawEscapeSequenceInjector.ESC, executionMode) }
+            KeyButton(text = "Tab", modifier = Modifier.weight(1f)) { onSendFormattedCommand(RawEscapeSequenceInjector.TAB, executionMode) }
+        }
+
+        // Raw Hex Sequence Injection Field
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = hexInput,
+                onValueChange = { hexInput = it },
+                label = { Text("Hex / Raw Escape (e.g. \\x1b\\x5b\\x41)") },
+                singleLine = true,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    val bytes = RawEscapeSequenceInjector.parseHexSequence(hexInput)
+                    if (bytes.isNotEmpty()) {
+                        onSendFormattedCommand(String(bytes, Charsets.UTF_8), executionMode)
+                        hexInput = ""
+                    }
+                },
+                enabled = hexInput.isNotEmpty()
+            ) {
+                Text("Inject")
+            }
+        }
+
+        // Direct Text Input Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = singleLineCommand,
+                onValueChange = { singleLineCommand = it },
+                label = { Text("Command...") },
+                singleLine = true,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    if (singleLineCommand.isNotEmpty()) {
+                        onSendFormattedCommand(singleLineCommand + "\n", executionMode)
+                        singleLineCommand = ""
+                    }
+                },
+                enabled = singleLineCommand.isNotEmpty()
+            ) {
+                Text("Send")
+            }
+        }
+
+        HorizontalDivider()
+
+        // Multi-Line Staging Drawer with Tokenization
+        Text("Multi-Line Command Staging Drawer", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+
+        OutlinedTextField(
+            value = stagedScript,
+            onValueChange = { stagedScript = it },
+            label = { Text("Staged Multi-line Script (use {{TOKEN}})") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(110.dp),
+            maxLines = 5
+        )
+
+        if (extractedTokens.isNotEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text("Parameter Tokens Required:", style = MaterialTheme.typography.labelMedium)
+                extractedTokens.forEach { token ->
+                    val currentVal = parameterBindings[token] ?: ""
+                    OutlinedTextField(
+                        value = currentVal,
+                        onValueChange = { newVal ->
+                            parameterBindings[token] = newVal
+                        },
+                        label = { Text("{{\$token}}") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+        Button(
+            onClick = {
+                val evaluated = stager.substituteTokens(stagedScript, parameterBindings)
+                onSendFormattedCommand(evaluated + "\n", executionMode)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("🚀 Dispatch Staged Script")
+        }
+
+        HorizontalDivider()
+
+        // Macro Management Grid & Execution
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Saved SSH Macros", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Button(
+                onClick = {
+                    editingMacro = null
+                    showMacroAddEditDialog = true
+                }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Macro")
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Add Macro")
+            }
+        }
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            macrosList.forEach { macro ->
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(macro.name, fontWeight = FontWeight.Bold)
+                            Text("${macro.category} • ${macro.tags} • ${macro.command}", style = MaterialTheme.typography.bodySmall)
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = {
+                                editingMacro = macro
+                                showMacroAddEditDialog = true
+                            }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Edit Macro")
+                            }
+                            IconButton(onClick = {
+                                macrosList.remove(macro)
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete Macro")
+                            }
+                            Button(
+                                onClick = {
+                                    if (macro.requireConfirmation) {
+                                        pendingMacro = macro
+                                        showConfirmationDialog = true
+                                    } else {
+                                        onSendFormattedCommand(macro.command + "\n", executionMode)
+                                    }
+                                }
+                            ) {
+                                Text(if (macro.requireConfirmation) "⚠️ Run" else "Run")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showConfirmationDialog && pendingMacro != null) {
+        AlertDialog(
+            onDismissRequest = { showConfirmationDialog = false },
+            title = { Text("⚠️ Safety Confirmation") },
+            text = { Text("Macro '${pendingMacro?.name}' executes potentially destructive command:\n\n${pendingMacro?.command}\n\nAre you sure you want to proceed?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        pendingMacro?.let { onSendFormattedCommand(it.command + "\n", executionMode) }
+                        showConfirmationDialog = false
+                    }
+                ) {
+                    Text("Confirm Execution")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showConfirmationDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showMacroAddEditDialog) {
+        MacroAddEditDialog(
+            initialMacro = editingMacro,
+            onDismiss = { showMacroAddEditDialog = false },
+            onSave = { savedMacro ->
+                val existingIndex = macrosList.indexOfFirst { it.id == savedMacro.id }
+                if (existingIndex >= 0) {
+                    macrosList[existingIndex] = savedMacro
+                } else {
+                    macrosList.add(savedMacro)
+                }
+                showMacroAddEditDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun MacroAddEditDialog(
+    initialMacro: SshMacroEntity?,
+    onDismiss: () -> Unit,
+    onSave: (SshMacroEntity) -> Unit
+) {
+    var name by remember { mutableStateOf(initialMacro?.name ?: "") }
+    var command by remember { mutableStateOf(initialMacro?.command ?: "") }
+    var category by remember { mutableStateOf(initialMacro?.category ?: "prod") }
+    var tags by remember { mutableStateOf(initialMacro?.tags ?: "diagnostics") }
+    var workingDirectory by remember { mutableStateOf(initialMacro?.workingDirectory ?: "") }
+    var requireConfirmation by remember { mutableStateOf(initialMacro?.requireConfirmation ?: false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (initialMacro == null) "Add SSH Macro" else "Edit SSH Macro") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Macro Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = command,
+                    onValueChange = { command = it },
+                    label = { Text("Command") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = { category = it },
+                    label = { Text("Category (e.g. prod, lab, router)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = tags,
+                    onValueChange = { tags = it },
+                    label = { Text("Tags (e.g. diagnostics, maintenance)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = workingDirectory,
+                    onValueChange = { workingDirectory = it },
+                    label = { Text("Working Directory (Optional)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = requireConfirmation,
+                        onCheckedChange = { requireConfirmation = it }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Require Safety Confirmation before execution")
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (name.isBlank() || command.isBlank()) return@Button
+                    val macro = SshMacroEntity(
+                        id = initialMacro?.id ?: System.currentTimeMillis(),
+                        name = name.trim(),
+                        command = command.trim(),
+                        category = category.trim(),
+                        tags = tags.trim(),
+                        workingDirectory = workingDirectory.ifBlank { null },
+                        requireConfirmation = requireConfirmation
+                    )
+                    onSave(macro)
+                },
+                enabled = name.isNotBlank() && command.isNotBlank()
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable

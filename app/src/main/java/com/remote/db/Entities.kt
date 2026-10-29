@@ -90,3 +90,31 @@ data class ButtonMappingEntity(
     @ColumnInfo(name = "ir_raw_timings") val irRawTimings: String? = null,
     @ColumnInfo(name = "command_payload") val commandPayload: String? = null
 )
+
+@Entity(
+    tableName = "ssh_macros"
+)
+data class SshMacroEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "command") val command: String,
+    @ColumnInfo(name = "category") val category: String = "general",
+    @ColumnInfo(name = "tags") val tags: String = "diagnostics",
+    @ColumnInfo(name = "target_profile_id") val targetProfileId: Long? = null,
+    @ColumnInfo(name = "require_confirmation") val requireConfirmation: Boolean = false,
+    @ColumnInfo(name = "working_directory") val workingDirectory: String? = null,
+    @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "ssh_credentials"
+)
+data class SshCredentialEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "key_type") val keyType: String = "ED25519",
+    @ColumnInfo(name = "encrypted_key_data") val encryptedKeyData: String,
+    @ColumnInfo(name = "public_key_data") val publicKeyData: String? = null,
+    @ColumnInfo(name = "passphrase_protected") val passphraseProtected: Boolean = false,
+    @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis()
+)
