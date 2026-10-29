@@ -2,13 +2,9 @@ package com.remote.network
 
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier
-import net.schmizz.sshj.userauth.keyprovider.OpenSSHKeyFile
 import java.io.File
 import java.io.InputStream
-import java.io.ByteArrayInputStream
-import java.security.KeyPairGenerator
-import java.security.spec.ECGenParameterSpec
-import java.security.SecureRandom
+import java.io.OutputStream
 
 class SshClient : SshClientWrapper {
     private val client = SSHClient()
@@ -85,6 +81,9 @@ class SshClient : SshClientWrapper {
         override val inputStream: InputStream
             get() = channel.inputStream
 
+        override val outputStream: OutputStream
+            get() = channel.outputStream
+
         override val exitStatus: Int?
             get() = channel.exitStatus
 
@@ -96,6 +95,9 @@ class SshClient : SshClientWrapper {
     private class RealShellChannel(val channel: net.schmizz.sshj.connection.channel.direct.Session.Shell) : SshChannel {
         override val inputStream: InputStream
             get() = channel.inputStream
+
+        override val outputStream: OutputStream
+            get() = channel.outputStream
 
         override val exitStatus: Int?
             get() = null
